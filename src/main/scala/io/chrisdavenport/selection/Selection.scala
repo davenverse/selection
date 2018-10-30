@@ -14,10 +14,68 @@ final case class Selection[F[_], B, A](unwrap: F[Either[B, A]]) extends AnyVal{
     
 }
 object Selection {
+
+  // Functions
+  def unwrap[F[_], B, A](s: Selection[F, B, A]): F[Either[B, A]] = s.unwrap
   
+  def modifySelection[F[_]: Functor, G[_], B, A, C, D](
+    s: Selection[F, B, A]
+  )(f: F[Either[B, A]] => G[Either[C, D]]): Selection[G, C, D] = Selection(f(s.unwrap))
+
+  def newSelection[F[_]: Functor,B, A](f: F[A]): Selection[F, B, A] =
+    Selection(f.map(Either.right))
+
+  def forgetSelection[F[_]: Functor, A](s: Selection[F, A, A]): F[A] = 
+    unify(s)(identity)(identity)
+
+  def include[F[_]: Functor, A](s: Selection[F, A, A])(f: A => Boolean): Selection[F,A, A] =
+    modifySelection(s)(_.map(_.fold(choose(f), Either.right)))
+
+  def exclude[F[_]: Functor, A](s: Selection[F, A, A])(f: A => Boolean): Selection[F, A, A] = 
+    modifySelection(s)(_.map(_.fold(Either.left, a => switch(choose(f)(a)))))
+
+  def selectAll[F[_]: Functor, A](s: Selection[F, A, A]): Selection[F, A, A] =
+    include[F,A](s)(_ => true)
+  
+  def deselectAll[F[_]: Functor, A](s: Selection[F, A, A]): Selection[F, A, A]=
+    exclude[F, A](s)(_ => true)
+
+  def select[F[_]: Functor, A](s: Selection[F, A, A])(f: A => Boolean): Selection[F, A, A] = 
+    select(deselectAll(s))(f)
+
+  def invertSelection[F[_]: Functor, A, B](s: Selection[F, A, B]): Selection[F, B, A] = 
+    modifySelection(s)(_.map(switch))
+
+  def mapSelected[F[_]: Functor, B, A, C](s: Selection[F, B, A])(f: A => C): Selection[F, B, C] =
+    Selection(s.unwrap.map(_.map(f)))
+
+  def mapUnselected[F[_]: Functor, B, A, C](s: Selection[F, B, A])(f: B => C): Selection[F, C, A] =
+    Selection(s.unwrap.map(_.leftMap(f)))
+
+  def getSelected[F[_]: Foldable, B, A](s: Selection[F, B, A]): List[A] =
+    s.unwrap.foldMap(_.fold(_ => List.empty, List(_)))
+
+  def getUnselected[F[_]: Foldable: Functor, B, A](s: Selection[F, B, A]): List[B] =
+    s.unwrap.foldMap(_.fold(List(_), _ => List.empty))
+
+  def unify[F[_]: Functor, A, B, C](s: Selection[F, B, A])(f1: B => C)(f2: A => C): F[C] =
+    s.unwrap.map(_.fold(f1, f2))
+
+  def trans[F[_], G[_], B, A](s: Selection[F, B, A])(f: F ~> G): Selection[G, B, A] =
+    Selection(f(s.unwrap))
+
+  // Helpers
+  private def choose1[A, B](f: A => B)(p: A => Boolean)(a: A) : Either[B, B] = 
+    if (p(a)) Either.right(f(a))
+    else Either.left(f(a))
+
+  private def choose[A](p: A => Boolean)(a: A): Either[A, A] =
+    choose1[A, A](identity)(p)(a)
+
+  private def switch[A, B](e: Either[A, B]): Either[B, A] = 
+    e.fold(Either.right, Either.left)
+
   // Typeclasses
-  // Foldable => Bifoldable
-  // Traversable => Bitraversable
   implicit def functorSelection[F[_]: Functor, B]: Functor[Selection[F,B, ?]] = 
     new Functor[Selection[F, B, ?]]{
       def map[A, C](fa: Selection[F, B,A])(f: A => C): Selection[F, B, C] =
@@ -101,65 +159,5 @@ object Selection {
           case Right(b) => g(b).map(Either.right[C, D])
         }.map(Selection(_))
     }
-
-  // Functions
-  def unwrap[F[_], B, A](s: Selection[F, B, A]): F[Either[B, A]] = s.unwrap
-  
-  def modifySelection[F[_]: Functor, G[_], B, A, C, D](
-    s: Selection[F, B, A]
-  )(f: F[Either[B, A]] => G[Either[C, D]]): Selection[G, C, D] = Selection(f(s.unwrap))
-
-  def newSelection[F[_]: Functor,B, A](f: F[A]): Selection[F, B, A] =
-    Selection(f.map(Either.right))
-
-  def forgetSelection[F[_]: Functor, A](s: Selection[F, A, A]): F[A] = 
-    unify(s)(identity)(identity)
-
-  def include[F[_]: Functor, A](s: Selection[F, A, A])(f: A => Boolean): Selection[F,A, A] =
-    modifySelection(s)(_.map(_.fold(choose(f), Either.right)))
-
-  def exclude[F[_]: Functor, A](s: Selection[F, A, A])(f: A => Boolean): Selection[F, A, A] = 
-    modifySelection(s)(_.map(_.fold(Either.left, a => switch(choose(f)(a)))))
-
-  def selectAll[F[_]: Functor, A](s: Selection[F, A, A]): Selection[F, A, A] =
-    include[F,A](s)(_ => true)
-  
-  def deselectAll[F[_]: Functor, A](s: Selection[F, A, A]): Selection[F, A, A]=
-    exclude[F, A](s)(_ => true)
-
-  def select[F[_]: Functor, A](s: Selection[F, A, A])(f: A => Boolean): Selection[F, A, A] = 
-    select(deselectAll(s))(f)
-
-  def invertSelection[F[_]: Functor, A, B](s: Selection[F, A, B]): Selection[F, B, A] = 
-    modifySelection(s)(_.map(switch))
-
-  def mapSelected[F[_]: Functor, B, A, C](s: Selection[F, B, A])(f: A => C): Selection[F, B, C] =
-    Selection(s.unwrap.map(_.map(f)))
-
-  def mapUnselected[F[_]: Functor, B, A, C](s: Selection[F, B, A])(f: B => C): Selection[F, C, A] =
-    Selection(s.unwrap.map(_.leftMap(f)))
-
-  def getSelected[F[_]: Foldable, B, A](s: Selection[F, B, A]): List[A] =
-    s.unwrap.foldMap(_.fold(_ => List.empty, List(_)))
-
-  def getUnselected[F[_]: Foldable: Functor, B, A](s: Selection[F, B, A]): List[B] =
-    s.unwrap.foldMap(_.fold(List(_), _ => List.empty))
-
-  def unify[F[_]: Functor, A, B, C](s: Selection[F, B, A])(f1: B => C)(f2: A => C): F[C] =
-    s.unwrap.map(_.fold(f1, f2))
-
-  def trans[F[_], G[_], B, A](s: Selection[F, B, A])(f: F ~> G): Selection[G, B, A] =
-    Selection(f(s.unwrap))
-
-  // Helpers
-  private def choose1[A, B](f: A => B)(p: A => Boolean)(a: A) : Either[B, B] = 
-    if (p(a)) Either.right(f(a))
-    else Either.left(f(a))
-
-  private def choose[A](p: A => Boolean)(a: A): Either[A, A] =
-    choose1[A, A](identity)(p)(a)
-
-  private def switch[A, B](e: Either[A, B]): Either[B, A] = 
-    e.fold(Either.right, Either.left)
 
 }
