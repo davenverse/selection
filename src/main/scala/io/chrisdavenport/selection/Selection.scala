@@ -6,19 +6,25 @@ import cats.implicits._
 /**
   * A selection wraps a Functor f and has an unselected type b and a selected type a
   */
-final case class Selection[F[_], B, A](unwrap: F[Either[B, A]]) extends AnyVal
+final case class Selection[F[_], B, A](unwrap: F[Either[B, A]]) extends AnyVal{
+
+  def modifySelection[G[_], C ,D](f: F[Either[B, A]] => G[Either[C, D]])(implicit F: Functor[F]): Selection[G, C, D] =
+    Selection.modifySelection(this)(f)
+
+    
+}
 object Selection {
   
   // Typeclasses
   // Foldable => Bifoldable
   // Traversable => Bitraversable
-  def functorSelection[F[_]: Functor, B]: Functor[Selection[F,B, ?]] = 
+  implicit def functorSelection[F[_]: Functor, B]: Functor[Selection[F,B, ?]] = 
     new Functor[Selection[F, B, ?]]{
       def map[A, C](fa: Selection[F, B,A])(f: A => C): Selection[F, B, C] =
         Selection(fa.unwrap.map(_.map(f)))
     }
 
-  def foldableSelection[F[_]: Foldable, C]: Foldable[Selection[F, C,?]] = 
+  implicit def foldableSelection[F[_]: Foldable, C]: Foldable[Selection[F, C,?]] = 
     new Foldable[Selection[F, C, ?]]{
       def foldLeft[A, B](fa: Selection[F,C,A],b: B)(f: (B, A) => B): B = 
         fa.unwrap.foldLeft(b){
@@ -32,7 +38,7 @@ object Selection {
         }
     }
 
-  def traversableSelection[F[_]: Traverse, C]: Traverse[Selection[F, C, ?]] = 
+  implicit def traversableSelection[F[_]: Traverse, C]: Traverse[Selection[F, C, ?]] = 
     new Traverse[Selection[F, C, ?]]{
       def foldLeft[A, B](fa: Selection[F,C,A],b: B)(f: (B, A) => B): B = 
         fa.unwrap.foldLeft(b){
@@ -49,14 +55,14 @@ object Selection {
     }
   
 
-  def monadSelection[F[_]: Monad, B]: Monad[Selection[F, B, ?]]  =
+  implicit def monadSelection[F[_]: Monad, B]: Monad[Selection[F, B, ?]]  =
     new StackSafeMonad[Selection[F, B, ?]]{
       def pure[A](x: A): Selection[F,B,A] = Selection(x.pure[F].map(Either.right))
       def flatMap[A, C](fa: Selection[F,B,A])(f: A => Selection[F,B,C]):Selection[F,B,C] = 
         Selection(fa.unwrap.flatMap(_.fold(Either.left[B, C](_).pure[F], f(_).unwrap)))
     }
 
-  def functorBifunctorSelection[F[_]: Functor]: Bifunctor[Selection[F, ?,? ]] = 
+  implicit def functorBifunctorSelection[F[_]: Functor]: Bifunctor[Selection[F, ?,? ]] = 
     new Bifunctor[Selection[F, ?,?]]{
       def bimap[A, B, C, D](fab: Selection[F,A,B])(f: A => C, g: B => D): Selection[F,C,D] =
         Selection(fab.unwrap.map(_.fold(f(_).asLeft, g(_).asRight)))
