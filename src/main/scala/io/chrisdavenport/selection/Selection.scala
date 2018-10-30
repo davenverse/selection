@@ -68,6 +68,40 @@ object Selection {
         Selection(fab.unwrap.map(_.fold(f(_).asLeft, g(_).asRight)))
     }
 
+  implicit def foldableBiFoldableSelection[F[_]: Foldable]: Bifoldable[Selection[F, ?, ?]] =
+    new Bifoldable[Selection[F, ?, ?]]{
+      def bifoldLeft[A, B, C](fab: Selection[F,A,B],c: C)(f: (C, A) => C,g: (C, B) => C): C = 
+        fab.unwrap.foldLeft(c){
+          case (c, Left(a)) => f(c, a)
+          case (c, Right(b)) => g(c, b)
+        }
+      def bifoldRight[A, B, C](fab: Selection[F,A,B],c: Eval[C])(f: (A, Eval[C]) => Eval[C],g: (B, Eval[C]) => Eval[C]): Eval[C] = 
+        fab.unwrap.foldRight(c){
+          case (Left(a), ec) => f(a, ec)
+          case (Right(b), ec) => g(b, ec)
+        }
+    }
+
+  implicit def traversableBiTraverseSelection[F[_]: Traverse]: Bitraverse[Selection[F, ?,? ]] =
+    new Bitraverse[Selection[F, ?, ?]]{
+      def bifoldLeft[A, B, C](fab: Selection[F,A,B],c: C)(f: (C, A) => C,g: (C, B) => C): C = 
+        fab.unwrap.foldLeft(c){
+          case (c, Left(a)) => f(c, a)
+          case (c, Right(b)) => g(c, b)
+        }
+      def bifoldRight[A, B, C](fab: Selection[F,A,B],c: Eval[C])(f: (A, Eval[C]) => Eval[C],g: (B, Eval[C]) => Eval[C]): Eval[C] = 
+        fab.unwrap.foldRight(c){
+          case (Left(a), ec) => f(a, ec)
+          case (Right(b), ec) => g(b, ec)
+        }
+
+      def bitraverse[G[_]: Applicative, A, B, C, D](fab: Selection[F,A,B])(f: A => G[C], g: B => G[D]): G[Selection[F,C,D]] =
+        fab.unwrap.traverse{
+          case Left(a) => f(a).map(Either.left[C, D])
+          case Right(b) => g(b).map(Either.right[C, D])
+        }.map(Selection(_))
+    }
+
   // Functions
   def unwrap[F[_], B, A](s: Selection[F, B, A]): F[Either[B, A]] = s.unwrap
   

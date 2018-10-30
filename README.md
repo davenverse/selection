@@ -10,8 +10,8 @@ Selection is a wrapper around Functors which adds several combinators and intere
 - Expand/Contract a selection based on additional predicates using include and exclude
 - TODO: Select values based on their context if your functor is also a Comonad
 - Map over unselected and/or selected values using Bifunctor
-- TODO: Traverse over unselected and/or selected values using Bitraversable
-- TODO: Fold over unselected and/or selected values using Bifoldable
+- Traverse over unselected and/or selected values using Bitraversable
+- Fold over unselected and/or selected values using Bifoldable
 - Perform monad computations over selected values if your functor is a Monad
 - Extract all unselected or selected elements to a list
 - Deselect and return to your original functor using unify
