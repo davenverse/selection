@@ -3,6 +3,9 @@ package io.chrisdavenport.selection
 import cats._
 import cats.implicits._
 
+/**
+  * A selection wraps a Functor f and has an unselected type b and a selected type a
+  */
 final case class Selection[F[_], B, A](unwrap: F[Either[B, A]]) extends AnyVal
 object Selection {
   
