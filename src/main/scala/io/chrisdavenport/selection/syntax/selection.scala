@@ -4,7 +4,12 @@ package syntax
 import cats._
 
 trait  selection {
-  implicit class binaryFunctorOps[F[_]: Functor, B, A](s: Selection[F, B, A]){
+  implicit class selectionCreationFunctorOps[F[_]: Functor, A](private val fa: F[A]){
+    def newSelection: Selection[F, A, A] = Selection.newSelection(fa)
+    def newSelectionB[B]: Selection[F, B, A] = Selection.newSelectionB(fa)
+  }
+
+  implicit class binaryFunctorOps[F[_]: Functor, B, A](private val s: Selection[F, B, A]){
     def modifySelection[G[_], C ,D](f: F[Either[B, A]] => G[Either[C, D]]): Selection[G, C, D] =
       Selection.modifySelection(s)(f)
     def invertSelection: Selection[F, A, B] = Selection.invertSelection(s)
@@ -13,12 +18,12 @@ trait  selection {
     def unify[C](fb: B => C)(fa: A => C): F[C] = Selection.unify(s)(fb)(fa)
   }
 
-  implicit class binaryFoldableOps[F[_]: Foldable, B, A](s: Selection[F, B, A]){
+  implicit class binaryFoldableOps[F[_]: Foldable, B, A](private val s: Selection[F, B, A]){
     def getSelected: List[A] = Selection.getSelected(s)
     def getUnselected: List[B] = Selection.getUnselected(s)
   }
   
-  implicit class unaryFunctorOps[F[_]: Functor, A](s: Selection[F, A, A]){
+  implicit class unaryFunctorOps[F[_]: Functor, A](private val s: Selection[F, A, A]){
     def forgetSelection: F[A] = Selection.forgetSelection(s)
     def include(f: A => Boolean): Selection[F, A, A] = Selection.include(s)(f)
     def exclude(f: A => Boolean): Selection[F, A, A] = Selection.exclude(s)(f)

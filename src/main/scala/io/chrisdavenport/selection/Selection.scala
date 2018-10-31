@@ -15,7 +15,14 @@ object Selection {
   /**
     * Create a selection from a functor by selecting all values
     */
-  def newSelection[F[_]: Functor,B, A](f: F[A]): Selection[F, B, A] =
+  def newSelection[F[_]: Functor, A](f: F[A]): Selection[F, A, A] =
+    newSelectionB[F, A, A](f)
+
+  /**
+    * Create a selection from a functor by selecting all values,
+    * demands specification of the unselected type.
+    */
+  def newSelectionB[F[_]: Functor, B, A](f: F[A]): Selection[F, B, A] =
     Selection(f.map(Either.right))
 
   // Functions
