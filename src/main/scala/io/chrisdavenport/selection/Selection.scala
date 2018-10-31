@@ -75,7 +75,7 @@ object Selection {
     *  Clear the selection then select only items which match a predicate.
     */
   def select[F[_]: Functor, A](s: Selection[F, A, A])(f: A => Boolean): Selection[F, A, A] = 
-    select(deselectAll(s))(f)
+    include(deselectAll(s))(f)
 
   // Binary Functions
 
