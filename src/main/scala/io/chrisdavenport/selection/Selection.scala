@@ -135,6 +135,14 @@ object Selection {
     e.fold(Either.right, Either.left)
 
   // Typeclasses
+  implicit def eqSelection[F[_], B, A](implicit eq: Eq[F[Either[B, A]]]): Eq[Selection[F, B, A]] =
+    Eq.by(_.unwrap)
+
+  implicit def showSelection[F[_], B,A ](implicit show: Show[F[Either[B, A]]]): Show[Selection[F, B, A]] =
+    Show.show(s => 
+      s"Selection(${show.show(s.unwrap)})"
+    )
+
   implicit def functorSelection[F[_]: Functor, B]: Functor[Selection[F,B, ?]] = 
     new Functor[Selection[F, B, ?]]{
       def map[A, C](fa: Selection[F, B,A])(f: A => C): Selection[F, B, C] =
