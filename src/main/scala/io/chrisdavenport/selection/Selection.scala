@@ -7,61 +7,113 @@ import cats.implicits._
   * A selection wraps a Functor f and has an unselected type b and a selected type a
   */
 final case class Selection[F[_], B, A](unwrap: F[Either[B, A]]) extends AnyVal{
-
-  def modifySelection[G[_], C ,D](f: F[Either[B, A]] => G[Either[C, D]])(implicit F: Functor[F]): Selection[G, C, D] =
-    Selection.modifySelection(this)(f)
-
-    
+  def mapK[G[_]](f: F ~> G): Selection[G, B, A] = Selection.mapK(this)(f)
 }
 object Selection {
 
-  // Functions
-  def unwrap[F[_], B, A](s: Selection[F, B, A]): F[Either[B, A]] = s.unwrap
-  
-  def modifySelection[F[_]: Functor, G[_], B, A, C, D](
-    s: Selection[F, B, A]
-  )(f: F[Either[B, A]] => G[Either[C, D]]): Selection[G, C, D] = Selection(f(s.unwrap))
-
+  // Constructor
+  /**
+    * Create a selection from a functor by selecting all values
+    */
   def newSelection[F[_]: Functor,B, A](f: F[A]): Selection[F, B, A] =
     Selection(f.map(Either.right))
 
+  // Functions
+
+  /**
+    * Function Unwrapping, rather than method
+    */
+  def unwrap[F[_], B, A](s: Selection[F, B, A]): F[Either[B, A]] = s.unwrap
+  
+  /**
+    * Modify the underlying representation of a selection
+    */
+  def modifySelection[F[_]: Functor, G[_], B, A, C, D](
+    s: Selection[F, B, A]
+  )(f: F[Either[B, A]] => G[Either[C, D]]): Selection[G, C, D] = Selection(f(s.unwrap))
+  
+  // Unary Functions
+
+  /**
+    * Drops selection from your functor returning all values (selected or not).
+    */
   def forgetSelection[F[_]: Functor, A](s: Selection[F, A, A]): F[A] = 
     unify(s)(identity)(identity)
 
+  /**
+    * Add items which match a predicate to the current selection
+    */
   def include[F[_]: Functor, A](s: Selection[F, A, A])(f: A => Boolean): Selection[F,A, A] =
     modifySelection(s)(_.map(_.fold(choose(f), Either.right)))
 
+  /**
+    *  Remove items which match a predicate to the current selection
+    */
   def exclude[F[_]: Functor, A](s: Selection[F, A, A])(f: A => Boolean): Selection[F, A, A] = 
     modifySelection(s)(_.map(_.fold(Either.left, a => switch(choose(f)(a)))))
 
+  /**
+    * Select all items in the container
+    */
   def selectAll[F[_]: Functor, A](s: Selection[F, A, A]): Selection[F, A, A] =
     include[F,A](s)(_ => true)
   
+  /**
+    * Deselect all items in the container
+    */
   def deselectAll[F[_]: Functor, A](s: Selection[F, A, A]): Selection[F, A, A]=
     exclude[F, A](s)(_ => true)
 
+  /**
+    *  Clear the selection then select only items which match a predicate.
+    */
   def select[F[_]: Functor, A](s: Selection[F, A, A])(f: A => Boolean): Selection[F, A, A] = 
     select(deselectAll(s))(f)
 
+  // Binary Functions
+
+  /**
+    * Flip the selection, all selected are now unselected and vice versa
+    */
   def invertSelection[F[_]: Functor, A, B](s: Selection[F, A, B]): Selection[F, B, A] = 
     modifySelection(s)(_.map(switch))
 
+  /**
+    * Map over selected values.
+    */
   def mapSelected[F[_]: Functor, B, A, C](s: Selection[F, B, A])(f: A => C): Selection[F, B, C] =
     Selection(s.unwrap.map(_.map(f)))
 
+  /**
+    * Map over unselected values.
+    */
   def mapUnselected[F[_]: Functor, B, A, C](s: Selection[F, B, A])(f: B => C): Selection[F, C, A] =
     Selection(s.unwrap.map(_.leftMap(f)))
 
+  /**
+    * Collect all selected values into a list. For more complex operations use
+    * foldMap.
+    */
   def getSelected[F[_]: Foldable, B, A](s: Selection[F, B, A]): List[A] =
     s.unwrap.foldMap(_.fold(_ => List.empty, List(_)))
 
-  def getUnselected[F[_]: Foldable: Functor, B, A](s: Selection[F, B, A]): List[B] =
+  /**
+    * Collect all unselected values into a list. For more complex operations use
+    * foldMap.
+    */
+  def getUnselected[F[_]: Foldable, B, A](s: Selection[F, B, A]): List[B] =
     s.unwrap.foldMap(_.fold(List(_), _ => List.empty))
 
+  /**
+    * Unify selected and unselected and forget the selection
+    */
   def unify[F[_]: Functor, A, B, C](s: Selection[F, B, A])(f1: B => C)(f2: A => C): F[C] =
     s.unwrap.map(_.fold(f1, f2))
 
-  def trans[F[_], G[_], B, A](s: Selection[F, B, A])(f: F ~> G): Selection[G, B, A] =
+  /**
+    * Perform a natural transformation over the underlying container of a selectable
+    */
+  def mapK[F[_], G[_], B, A](s: Selection[F, B, A])(f: F ~> G): Selection[G, B, A] =
     Selection(f(s.unwrap))
 
   // Helpers

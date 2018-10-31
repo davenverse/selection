@@ -1,6 +1,6 @@
 # selection [![Build Status](https://travis-ci.com/ChristopherDavenport/selection.svg?branch=master)](https://travis-ci.com/ChristopherDavenport/selection)
 
-selection is a Scala library for transforming subsets of values within a functor.
+selection is a Scala library for transforming subsets of values within a functor. Inspired by [selections](https://github.com/ChrisPenner/selections)
 
 Ever wished you could select just a few values within a functor, perform some operations on them, then flatten them back into the plain old functor again? Now you can!
 
