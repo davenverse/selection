@@ -8,6 +8,10 @@ trait  selection {
     def newSelection: Selection[F, A, A] = Selection.newSelection(fa)
     def newSelectionB[B]: Selection[F, B, A] = Selection.newSelectionB(fa)
   }
+  
+  implicit class selectionNoConstraintOps[F[_], B, A](private val s: Selection[F, B, A]){
+    def mapK[G[_]](f: F ~> G): Selection[G, B, A] = Selection.mapK(s)(f)
+  }
 
   implicit class binaryFunctorOps[F[_]: Functor, B, A](private val s: Selection[F, B, A]){
     def modifySelection[G[_], C ,D](f: F[Either[B, A]] => G[Either[C, D]]): Selection[G, C, D] =

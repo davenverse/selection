@@ -5,10 +5,10 @@ import cats.implicits._
 
 /**
   * A selection wraps a Functor f and has an unselected type b and a selected type a
+  * import io.chrisdavenport.selection.implicits._ for method syntax enhancements
   */
-final case class Selection[F[_], B, A](unwrap: F[Either[B, A]]) extends AnyVal{
-  def mapK[G[_]](f: F ~> G): Selection[G, B, A] = Selection.mapK(this)(f)
-}
+final case class Selection[F[_], B, A](unwrap: F[Either[B, A]]) extends AnyVal
+
 object Selection extends SelectionInstances {
 
   // Constructor
