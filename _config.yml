@@ -1,6 +1,6 @@
 name: selection
 baseurl: /selection
-description: Transforming Subsets of Values within a Functor
+description: Functor Transformations for Scala
 highlighter: rouge
 docs: true
 collections:

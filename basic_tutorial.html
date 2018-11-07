@@ -1,0 +1,166 @@
+<html><head><title>selection: Tutorial</title><meta charset="utf-8" /><meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" /><meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="author" content="Christopher Davenport" /><meta name="description" content="Functor Transformations for Scala" /><meta name="og:image" content="/selection/img/poster.png" /><meta name="og:title" content="selection: Tutorial" /><meta name="og:site_name" content="selection" /><meta name="og:url" content="https://github.com/ChristopherDavenport/selection" /><meta name="og:type" content="website" /><meta name="og:description" content="Functor Transformations for Scala" /><link rel="icon" type="image/png" href="/selection/img/favicon.png" /><meta name="twitter:title" content="selection: Tutorial" /><meta name="twitter:image" content="https://github.com/ChristopherDavenport/selectionimg/poster.png" /><meta name="twitter:description" content="Functor Transformations for Scala" /><meta name="twitter:card" content="summary_large_image" /><link rel="icon" type="image/png" sizes="16x16" href="/selection/img/favicon16x16.png" /><link rel="icon" type="image/png" sizes="24x24" href="/selection/img/favicon24x24.png" /><link rel="icon" type="image/png" sizes="32x32" href="/selection/img/favicon32x32.png" /><link rel="icon" type="image/png" sizes="48x48" href="/selection/img/favicon48x48.png" /><link rel="icon" type="image/png" sizes="57x57" href="/selection/img/favicon57x57.png" /><link rel="icon" type="image/png" sizes="60x60" href="/selection/img/favicon60x60.png" /><link rel="icon" type="image/png" sizes="64x64" href="/selection/img/favicon64x64.png" /><link rel="icon" type="image/png" sizes="70x70" href="/selection/img/favicon70x70.png" /><link rel="icon" type="image/png" sizes="72x72" href="/selection/img/favicon72x72.png" /><link rel="icon" type="image/png" sizes="76x76" href="/selection/img/favicon76x76.png" /><link rel="icon" type="image/png" sizes="96x96" href="/selection/img/favicon96x96.png" /><link rel="icon" type="image/png" sizes="114x114" href="/selection/img/favicon114x114.png" /><link rel="icon" type="image/png" sizes="120x120" href="/selection/img/favicon120x120.png" /><link rel="icon" type="image/png" sizes="128x128" href="/selection/img/favicon128x128.png" /><link rel="icon" type="image/png" sizes="144x144" href="/selection/img/favicon144x144.png" /><link rel="icon" type="image/png" sizes="150x150" href="/selection/img/favicon150x150.png" /><link rel="icon" type="image/png" sizes="152x152" href="/selection/img/favicon152x152.png" /><link rel="icon" type="image/png" sizes="196x196" href="/selection/img/favicon196x196.png" /><link rel="icon" type="image/png" sizes="310x310" href="/selection/img/favicon310x310.png" /><link rel="icon" type="image/png" sizes="310x150" href="/selection/img/favicon310x150.png" /><link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" /><link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" /><link rel="stylesheet" href="/selection/highlight/styles/atom-one-light.css" /><link rel="stylesheet" href="/selection/css/style.css" /><link rel="stylesheet" href="/selection/css/palette.css" /><link rel="stylesheet" href="/selection/css/codemirror.css" /></head><body class="docs"><div id="wrapper"><div id="sidebar-wrapper"><ul id="sidebar" class="sidebar-nav"><li class="sidebar-brand"><a href="/selection/" class="brand"><div class="brand-wrapper"><span>selection</span></div></a></li><li><a href="/selection/basic_tutorial.html" class=" active ">Tutorial</a></li><li><a href="/selection/" class=""></a></li><li><a href="/selection/css/palette.css" class=""></a></li><li><a href="/selection/css/style.css" class=""></a></li></ul></div><div id="page-content-wrapper"><div class="nav"><div class="container-fluid"><div class="row"><div class="col-lg-12"><div class="action-menu pull-left clearfix"><a href="#menu-toggle" id="menu-toggle"><i class="fa fa-bars" aria-hidden="true"></i></a></div><ul class="pull-right"><li id="gh-eyes-item" class="hidden-xs"><a href="https://github.com/ChristopherDavenport/selection"><i class="fa fa-eye"></i><span>WATCH<span id="eyes" class="label label-default">--</span></span></a></li><li id="gh-stars-item" class="hidden-xs"><a href="https://github.com/ChristopherDavenport/selection"><i class="fa fa-star-o"></i><span>STARS<span id="stars" class="label label-default">--</span></span></a></li><li><a href="#" onclick="shareSiteTwitter('selection Functor Transformations for Scala');"><i class="fa fa-twitter"></i></a></li><li><a href="#" onclick="shareSiteFacebook('selection Functor Transformations for Scala');"><i class="fa fa-facebook"></i></a></li><li><a href="#" onclick="shareSiteGoogle();"><i class="fa fa-google-plus"></i></a></li></ul></div></div></div></div><div id="content" data-github-owner="ChristopherDavenport" data-github-repo="selection"><div class="content-wrapper"><section><p>To start the process lets get our imports out of the way.</p>
+
+<div class="language-scala highlighter-rouge"><pre class="highlight"><code><span class="k">import</span> <span class="nn">cats._</span>
+<span class="k">import</span> <span class="nn">cats.implicits._</span>
+<span class="k">import</span> <span class="nn">cats.derived._</span> <span class="c1">// For Kittens Derivation
+</span><span class="k">import</span> <span class="nn">io.chrisdavenport.selection._</span>
+<span class="k">import</span> <span class="nn">io.chrisdavenport.selection.implicits._</span>
+<span class="k">import</span> <span class="nn">cats.effect._</span> <span class="c1">// For Effect Display
+</span></code></pre>
+</div>
+
+<p>Now let’s build some data</p>
+
+<div class="language-scala highlighter-rouge"><pre class="highlight"><code><span class="c1">// Weirdness in this block is for companion object behavior in tut
+</span>
+<span class="k">sealed</span> <span class="k">trait</span> <span class="nc">Country</span><span class="o">;</span> <span class="k">case</span> <span class="k">object</span> <span class="nc">USA</span> <span class="k">extends</span> <span class="nc">Country</span><span class="o">;</span> <span class="k">case</span> <span class="k">object</span> <span class="nc">Canada</span> <span class="k">extends</span> <span class="nc">Country</span><span class="o">;</span> <span class="k">object</span> <span class="nc">Country</span> <span class="o">{</span>
+  <span class="k">implicit</span> <span class="k">val</span> <span class="n">showCountry</span><span class="k">:</span> <span class="kt">Show</span><span class="o">[</span><span class="kt">Country</span><span class="o">]</span> <span class="k">=</span> <span class="n">semi</span><span class="o">.</span><span class="n">show</span>
+  <span class="k">implicit</span> <span class="k">val</span> <span class="n">eqCountry</span><span class="k">:</span> <span class="kt">Eq</span><span class="o">[</span><span class="kt">Country</span><span class="o">]</span> <span class="k">=</span> <span class="n">semi</span><span class="o">.</span><span class="n">eq</span>
+<span class="o">}</span>
+<span class="c1">// defined trait Country
+// defined object USA
+// defined object Canada
+// defined object Country
+</span>
+<span class="k">final</span> <span class="k">case</span> <span class="k">class</span> <span class="nc">Account</span><span class="o">(</span><span class="n">name</span><span class="k">:</span> <span class="kt">String</span><span class="o">,</span> <span class="n">country</span><span class="k">:</span> <span class="kt">Country</span><span class="o">,</span> <span class="n">balance</span><span class="k">:</span> <span class="kt">Double</span><span class="o">);</span> <span class="k">object</span> <span class="nc">Account</span> <span class="o">{</span>
+  <span class="k">implicit</span> <span class="k">val</span> <span class="n">showCountry</span><span class="k">:</span> <span class="kt">Show</span><span class="o">[</span><span class="kt">Account</span><span class="o">]</span> <span class="k">=</span> <span class="n">semi</span><span class="o">.</span><span class="n">show</span>
+  <span class="k">implicit</span> <span class="k">val</span> <span class="n">eqCountry</span><span class="k">:</span> <span class="kt">Eq</span><span class="o">[</span><span class="kt">Account</span><span class="o">]</span> <span class="k">=</span> <span class="n">semi</span><span class="o">.</span><span class="n">eq</span>
+<span class="o">}</span>
+<span class="c1">// defined class Account
+// defined object Account
+</span></code></pre>
+</div>
+
+<p>So the accounts we are modeling are fairly simple. They have a name, country of origin and account balance. Let’s make a ‘database’ of accounts as a simple list:</p>
+
+<div class="language-scala highlighter-rouge"><pre class="highlight"><code><span class="k">val</span> <span class="n">accounts</span><span class="k">:</span> <span class="kt">List</span><span class="o">[</span><span class="kt">Account</span><span class="o">]</span> <span class="k">=</span> <span class="nc">List</span><span class="o">(</span>
+  <span class="nc">Account</span><span class="o">(</span><span class="s">"Steve"</span> <span class="o">,</span> <span class="nc">Canada</span>  <span class="o">,</span> <span class="mf">34D</span><span class="o">),</span>
+  <span class="nc">Account</span><span class="o">(</span><span class="s">"Cindy"</span> <span class="o">,</span> <span class="nc">USA</span>     <span class="o">,</span> <span class="mf">10D</span><span class="o">),</span>
+  <span class="nc">Account</span><span class="o">(</span><span class="s">"Blake"</span> <span class="o">,</span> <span class="nc">USA</span>     <span class="o">,</span> <span class="o">-</span><span class="mf">6D</span><span class="o">),</span>
+  <span class="nc">Account</span><span class="o">(</span><span class="s">"Carl"</span>  <span class="o">,</span> <span class="nc">Canada</span>  <span class="o">,</span> <span class="o">-</span><span class="mf">16D</span><span class="o">)</span>
+<span class="o">)</span>
+<span class="c1">// accounts: List[Account] = List(Account(Steve,Canada,34.0), Account(Cindy,USA,10.0), Account(Blake,USA,-6.0), Account(Carl,Canada,-16.0))
+</span></code></pre>
+</div>
+
+<p>Great! So far so good. Now we see where selections come in handy, let’s say we want to accumulate interest for all accounts with a POSITIVE account balance. Normally we’d need to map over every user, check their account balance, then perform the interest calculation. This code is pretty straightforward to write, but it gets a bit clunky in more complex situations. With selections we can select the accounts we want to work with, then map over them specifically!</p>
+
+<p>One additional complication! USA and Canadian accounts get different interest rates! No problem though, let’s see what we can do!</p>
+
+<div class="language-scala highlighter-rouge"><pre class="highlight"><code><span class="k">type</span> <span class="kt">Rate</span> <span class="o">=</span> <span class="nc">Double</span>
+<span class="c1">// defined type alias Rate
+</span>
+<span class="k">def</span> <span class="n">addInterest</span><span class="o">(</span><span class="n">rate</span><span class="k">:</span> <span class="kt">Rate</span><span class="o">)(</span><span class="n">user</span><span class="k">:</span> <span class="kt">Account</span><span class="o">)</span><span class="k">:</span> <span class="kt">Account</span> <span class="o">=</span> <span class="n">user</span><span class="o">.</span><span class="n">copy</span><span class="o">(</span><span class="n">balance</span> <span class="k">=</span> <span class="n">user</span><span class="o">.</span><span class="n">balance</span> <span class="o">*</span> <span class="n">rate</span><span class="o">)</span>
+<span class="c1">// addInterest: (rate: Rate)(user: Account)Account
+</span>
+<span class="k">val</span> <span class="n">usaRate</span> <span class="k">=</span> <span class="mf">1.25D</span>
+<span class="c1">// usaRate: Double = 1.25
+</span>
+<span class="k">val</span> <span class="n">canRate</span> <span class="k">=</span> <span class="mf">1.10D</span>
+<span class="c1">// canRate: Double = 1.1
+</span>
+<span class="k">val</span> <span class="n">adjusted</span> <span class="k">:</span> <span class="kt">List</span><span class="o">[</span><span class="kt">Account</span><span class="o">]</span> <span class="k">=</span> <span class="o">{</span>
+  <span class="n">accounts</span>
+    <span class="o">.</span><span class="n">newSelection</span>
+    <span class="o">.</span><span class="n">select</span><span class="o">(</span><span class="k">_</span><span class="o">.</span><span class="n">country</span> <span class="o">===</span> <span class="nc">USA</span><span class="o">)</span>
+    <span class="o">.</span><span class="n">exclude</span><span class="o">(</span><span class="k">_</span><span class="o">.</span><span class="n">balance</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="o">)</span>
+    <span class="o">.</span><span class="n">mapSelected</span><span class="o">(</span><span class="n">addInterest</span><span class="o">(</span><span class="n">usaRate</span><span class="o">)(</span><span class="k">_</span><span class="o">))</span>
+    <span class="o">.</span><span class="n">select</span><span class="o">(</span><span class="k">_</span><span class="o">.</span><span class="n">country</span> <span class="o">===</span> <span class="nc">Canada</span><span class="o">)</span>
+    <span class="o">.</span><span class="n">mapSelected</span><span class="o">(</span><span class="n">addInterest</span><span class="o">(</span><span class="n">canRate</span><span class="o">)(</span><span class="k">_</span><span class="o">))</span>
+    <span class="o">.</span><span class="n">forgetSelection</span>
+<span class="o">}</span>
+<span class="c1">// adjusted: List[Account] = List(Account(Steve,Canada,37.400000000000006), Account(Cindy,USA,12.5), Account(Blake,USA,-6.0), Account(Carl,Canada,-17.6))
+</span></code></pre>
+</div>
+
+<p>You can see it made the proper adjustments without touching the negative accounts! Since, quite a bit just happened, lets break it down a bit.</p>
+
+<div class="language-scala highlighter-rouge"><pre class="highlight"><code><span class="k">val</span> <span class="n">americans</span> <span class="k">:</span> <span class="kt">SelectionA</span><span class="o">[</span><span class="kt">List</span>, <span class="kt">Account</span><span class="o">]</span> <span class="k">=</span> <span class="o">{</span>
+  <span class="n">accounts</span><span class="o">.</span><span class="n">newSelection</span><span class="o">.</span><span class="n">select</span><span class="o">(</span><span class="k">_</span><span class="o">.</span><span class="n">country</span> <span class="o">===</span> <span class="nc">USA</span><span class="o">)</span>
+<span class="o">}</span>
+<span class="c1">// americans: io.chrisdavenport.selection.SelectionA[List,Account] = Selection(List(Left(Account(Steve,Canada,34.0)), Right(Account(Cindy,USA,10.0)), Right(Account(Blake,USA,-6.0)), Left(Account(Carl,Canada,-16.0))))
+</span></code></pre>
+</div>
+
+<p>So our first step is to create a selection around the list of users. <code class="highlighter-rouge">newSelection</code> wraps any <code class="highlighter-rouge">Functor</code> in a <code class="highlighter-rouge">Selection</code> type, either through the implicits as shown, or <code class="highlighter-rouge">Selection.newSelection</code>. The Selection type is <code class="highlighter-rouge">Selection[F[_], B, A]</code> where <code class="highlighter-rouge">F</code> is the functor, <code class="highlighter-rouge">B</code> represents the type of unselected data, <code class="highlighter-rouge">A</code> represents the type of selected data. These types can diverge as you like, but in this case they are both <code class="highlighter-rouge">Account</code> so we use the <code class="highlighter-rouge">SelectionA</code> type alias, which is simply a Selection where both unselected and selected data types are the same.</p>
+
+<p>Now that we have a new selection we have to tell it what we would like to select! <code class="highlighter-rouge">newSelection</code> selects all elements by default, which isn’t entirely useful, so we use <code class="highlighter-rouge">select</code> with a predicate to determine which elements we want to be in focus. In this case <code class="highlighter-rouge">.select(_.country === USA)</code> clears the previous selection, then selects only the american accounts</p>
+
+<p>As we can see above, we can see that the accounts in the USA are all wrapped in <code class="highlighter-rouge">Right</code> whereas the others are wrapped in <code class="highlighter-rouge">Left</code>. As users of the library, you don’t need to worry about that, the interface manages those details for you, but seeing it working is cool!</p>
+
+<p>If we wanted to select the Canadians we could write a predicate for that, or since we know that we are tracking only 2 countries right now, we could use <code class="highlighter-rouge">invertSelection</code> to flip the selection so that Canadians are focused and Americans are unselected.</p>
+
+<p>We can now use <code class="highlighter-rouge">getSelected</code> and <code class="highlighter-rouge">getUnselected</code> to get a list of USA or Canadian accounts respectively, not how the <code class="highlighter-rouge">Right</code>’s and <code class="highlighter-rouge">Left</code>’s disappear whenever we stop working within a Selection:</p>
+
+<div class="language-scala highlighter-rouge"><pre class="highlight"><code><span class="n">americans</span><span class="o">.</span><span class="n">getSelected</span>
+<span class="c1">// res2: List[Account] = List(Account(Cindy,USA,10.0), Account(Blake,USA,-6.0))
+</span>
+<span class="n">americans</span><span class="o">.</span><span class="n">getUnselected</span>
+<span class="c1">// res3: List[Account] = List(Account(Steve,Canada,34.0), Account(Carl,Canada,-16.0))
+</span></code></pre>
+</div>
+
+<p>We’ve got our americans selected, but Blake has a negative account balance! Let’s <code class="highlighter-rouge">exclude</code> any accounts with a negative balance. <code class="highlighter-rouge">exclude</code> keeps the current selection, but removes any elements that fial the predicate. There’s also an <code class="highlighter-rouge">include</code> combinator which will add any unselected elements which do pass the predicate(assuming you want that).</p>
+
+<div class="language-scala highlighter-rouge"><pre class="highlight"><code><span class="k">val</span> <span class="n">americansPositive</span> <span class="k">=</span> <span class="n">americans</span><span class="o">.</span><span class="n">exclude</span><span class="o">(</span><span class="k">_</span><span class="o">.</span><span class="n">balance</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="o">)</span>
+<span class="c1">// americansPositive: io.chrisdavenport.selection.Selection[List,Account,Account] = Selection(List(Left(Account(Steve,Canada,34.0)), Right(Account(Cindy,USA,10.0)), Left(Account(Blake,USA,-6.0)), Left(Account(Carl,Canada,-16.0))))
+</span></code></pre>
+</div>
+
+<p>Now we can finally make our transformation, <code class="highlighter-rouge">mapSelected</code> is provided if you want a nicely named combinator, however its just a synonym for <code class="highlighter-rouge">map</code>.</p>
+
+<div class="language-scala highlighter-rouge"><pre class="highlight"><code><span class="k">val</span> <span class="n">americansAdjusted</span> <span class="k">=</span> <span class="n">americansPositive</span><span class="o">.</span><span class="n">mapSelected</span><span class="o">(</span><span class="n">addInterest</span><span class="o">(</span><span class="n">usaRate</span><span class="o">)(</span><span class="k">_</span><span class="o">))</span>
+<span class="c1">// americansAdjusted: io.chrisdavenport.selection.Selection[List,Account,Account] = Selection(List(Left(Account(Steve,Canada,34.0)), Right(Account(Cindy,USA,12.5)), Left(Account(Blake,USA,-6.0)), Left(Account(Carl,Canada,-16.0))))
+</span></code></pre>
+</div>
+
+<p>All selections are <code class="highlighter-rouge">Bifunctors</code>, so you can <code class="highlighter-rouge">bimap</code> over the unselected and selected values respectively if you like. Let’s say there was a banking error in our user’s favour (it happens all the time I swear). All Americans get a $10 credit, all Canadians get a $7 credit!</p>
+
+<div class="language-scala highlighter-rouge"><pre class="highlight"><code><span class="k">def</span> <span class="n">adjustBalance</span><span class="o">(</span><span class="n">adjustment</span><span class="k">:</span> <span class="kt">Double</span> <span class="o">=&gt;</span> <span class="nc">Double</span><span class="o">)(</span><span class="n">account</span><span class="k">:</span> <span class="kt">Account</span><span class="o">)</span><span class="k">:</span> <span class="kt">Account</span> <span class="o">=</span> <span class="o">{</span>
+  <span class="n">account</span><span class="o">.</span><span class="n">copy</span><span class="o">(</span><span class="n">balance</span> <span class="k">=</span> <span class="n">adjustment</span><span class="o">(</span><span class="n">account</span><span class="o">.</span><span class="n">balance</span><span class="o">))</span>
+<span class="o">}</span>
+<span class="c1">// adjustBalance: (adjustment: Double =&gt; Double)(account: Account)Account
+</span>
+<span class="k">val</span> <span class="n">withCredit</span> <span class="k">:</span> <span class="kt">List</span><span class="o">[</span><span class="kt">Account</span><span class="o">]</span> <span class="k">=</span> <span class="o">{</span>
+  <span class="n">accounts</span>
+    <span class="o">.</span><span class="n">newSelection</span>
+    <span class="o">.</span><span class="n">select</span><span class="o">(</span><span class="k">_</span><span class="o">.</span><span class="n">country</span> <span class="o">===</span> <span class="nc">USA</span><span class="o">)</span>
+    <span class="o">.</span><span class="n">bimap</span><span class="o">(</span><span class="n">adjustBalance</span><span class="o">(</span><span class="k">_</span> <span class="o">+</span> <span class="mf">7D</span><span class="o">)(</span><span class="k">_</span><span class="o">),</span> <span class="n">adjustBalance</span><span class="o">(</span><span class="k">_</span> <span class="o">+</span> <span class="mf">10D</span><span class="o">)(</span><span class="k">_</span><span class="o">))</span>
+    <span class="o">.</span><span class="n">forgetSelection</span>
+<span class="o">}</span>
+<span class="c1">// withCredit: List[Account] = List(Account(Steve,Canada,41.0), Account(Cindy,USA,20.0), Account(Blake,USA,4.0), Account(Carl,Canada,-9.0))
+</span></code></pre>
+</div>
+
+<p>They’re also Bitraversable and Bifoldable, so we can perform operations with effects over each segement independently or
+perform different effectful operations over each type. Let’s print out a warning to all users with a negative balance!</p>
+
+<div class="language-scala highlighter-rouge"><pre class="highlight"><code><span class="k">val</span> <span class="n">warnDelinquents</span> <span class="k">=</span> <span class="o">{</span>
+  <span class="k">def</span> <span class="n">warn</span><span class="o">(</span><span class="n">user</span><span class="k">:</span> <span class="kt">Account</span><span class="o">)</span><span class="k">:</span> <span class="kt">IO</span><span class="o">[</span><span class="kt">Unit</span><span class="o">]</span> <span class="k">=</span> <span class="nc">IO</span><span class="o">(</span><span class="n">println</span><span class="o">(</span><span class="n">user</span><span class="o">.</span><span class="n">name</span> <span class="o">++</span> <span class="s">": get your act together!"</span><span class="o">))</span>
+  <span class="k">def</span> <span class="n">congrats</span><span class="o">(</span><span class="n">user</span><span class="k">:</span> <span class="kt">Account</span><span class="o">)</span><span class="k">:</span> <span class="kt">IO</span><span class="o">[</span><span class="kt">Unit</span><span class="o">]</span> <span class="k">=</span> <span class="nc">IO</span><span class="o">(</span><span class="n">println</span><span class="o">(</span><span class="n">user</span><span class="o">.</span><span class="n">name</span> <span class="o">++</span> <span class="s">" you're doing great!"</span><span class="o">))</span>
+  
+  <span class="n">accounts</span>
+    <span class="o">.</span><span class="n">newSelection</span>
+    <span class="o">.</span><span class="n">select</span><span class="o">(</span><span class="k">_</span><span class="o">.</span><span class="n">balance</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="o">)</span>
+    <span class="o">.</span><span class="n">bitraverse</span><span class="o">(</span><span class="n">congrats</span><span class="o">,</span> <span class="n">warn</span><span class="o">)</span>
+    <span class="o">.</span><span class="n">void</span>
+<span class="o">}</span>
+<span class="c1">// warnDelinquents: cats.effect.IO[Unit] = &lt;function1&gt;
+</span>
+<span class="n">warnDelinquents</span><span class="o">.</span><span class="n">unsafeRunSync</span>
+<span class="c1">// Steve you're doing great!
+// Cindy you're doing great!
+// Blake: get your act together!
+// Carl: get your act together!
+</span></code></pre>
+</div>
+
+<p>You can use the Bifoldable instance to do similarly interesting things, getSelected and getUnselected are provided as helpers which return lists of the selected and unselected items.</p>
+
+<p>That’s it for this tutorial!</p>
+</section></div></div></div></div><script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script><script src="/selection/highlight/highlight.pack.js"></script><script>hljs.configure({
+languages:['scala','java','bash']
+});
+hljs.initHighlighting();
+             </script><script>((window.gitter = {}).chat = {}).options = {
+room: 'ChristopherDavenport/selection'};</script><script src="https://sidecar.gitter.im/dist/sidecar.v1.js"></script><script src="/selection/js/main.js"></script></body></html>
