@@ -37,7 +37,7 @@ object Selection extends SelectionInstances {
     */
   def modifySelection[F[_]: Functor, G[_], B, A, C, D](
     s: Selection[F, B, A]
-  )(f: F[Either[B, A]] => G[Either[C, D]]): Selection[G, C, D] = Selection(f(s.unwrap))
+  )(f:F[Either[B, A]] => G[Either[C, D]]): Selection[G, C, D] = Selection(f(s.unwrap))
   
   // Unary Functions
 
@@ -122,6 +122,16 @@ object Selection extends SelectionInstances {
     */
   def mapK[F[_], G[_], B, A](s: Selection[F, B, A])(f: F ~> G): Selection[G, B, A] =
     Selection(f(s.unwrap))
+
+  /**
+    * Select values based on their context within a comonad.
+    */
+  def selectWithContext[W[_]: Comonad, A](s: Selection[W, A, A])(f: W[A] => Boolean): Selection[W, A, A] =
+    modifySelection(s){w: W[Either[A, A]] => 
+      val wa: W[A] = w.map(_.fold(identity, identity))
+      def waB(w: W[A]): Either[A, A] = choose1[W[A], A](_.extract)(f)(w)
+      wa.coflatten.map(waB)
+    }
 
   // Helpers
   private def choose1[A, B](f: A => B)(p: A => Boolean)(a: A) : Either[B, B] = 

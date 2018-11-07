@@ -8,7 +8,7 @@ Selection is a wrapper around Functors which adds several combinators and intere
 
 - Select specific values within your functor according to a predicate
 - Expand/Contract a selection based on additional predicates using include and exclude
-- TODO: Select values based on their context if your functor is also a Comonad
+- Select values based on their context if your functor is also a Comonad
 - Map over unselected and/or selected values using Bifunctor
 - Traverse over unselected and/or selected values using Bitraversable
 - Fold over unselected and/or selected values using Bifoldable
