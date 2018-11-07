@@ -10,7 +10,6 @@ val kittensV = "1.2.0"
 
 lazy val selection = project.in(file("."))
   .settings(commonSettings, releaseSettings, skipOnPublishSettings)
-  .enablePlugins(ScalaUnidocPlugin)
   .aggregate(core, docs)
 
 lazy val core = project.in(file("core"))
@@ -135,7 +134,7 @@ lazy val micrositeSettings = Seq(
   micrositeGithubOwner := "ChristopherDavenport",
   micrositeGithubRepo := "selection",
   micrositeBaseUrl := "/selection",
-  micrositeDocumentationUrl := "https://christopherdavenport.github.io/selection/latest/api",
+  micrositeDocumentationUrl := "https://christopherdavenport.github.io/selection/latest/api/io/chrisdavenport/selection/",
   micrositeFooterText := None,
   micrositeHighlightTheme := "atom-one-light",
   micrositePalette := Map(
