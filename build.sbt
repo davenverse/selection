@@ -9,7 +9,7 @@ lazy val core = project.in(file("core"))
   )
 
 lazy val docs = project.in(file("docs"))
-  .settings(commonSettings, releaseSettings, skipOnPublishSettings)
+  .settings(commonSettings, releaseSettings, skipOnPublishSettings, micrositeSettings)
   .dependsOn(core)
   .enablePlugins(MicrositesPlugin)
   .enablePlugins(TutPlugin)
