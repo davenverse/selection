@@ -1,0 +1,11 @@
+name: selection
+baseurl: /selection
+description: Transforming Subsets of Values within a Functor
+highlighter: rouge
+docs: true
+collections:
+  tut:
+    output: true
+version: 0.0.5-SNAPSHOT
+org: io.chrisdavenport
+markdown: kramdown
