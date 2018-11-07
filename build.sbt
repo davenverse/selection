@@ -1,8 +1,18 @@
-lazy val core = project.in(file("."))
-    .settings(commonSettings, releaseSettings)
-    .settings(
-      name := "selection"
-    )
+lazy val selection = project.in(file("."))
+  .settings(commonSettings, releaseSettings, skipOnPublishSettings)
+  .aggregate(core, docs)
+
+lazy val core = project.in(file("core"))
+  .settings(commonSettings, releaseSettings)
+  .settings(
+    name := "selection"
+  )
+
+lazy val docs = project.in(file("docs"))
+  .settings(commonSettings, releaseSettings, skipOnPublishSettings)
+  .dependsOn(core)
+  .enablePlugins(MicrositesPlugin)
+  .enablePlugins(TutPlugin)
 
 val catsV = "1.4.0"
 val specs2V = "4.3.5"
@@ -102,6 +112,40 @@ lazy val releaseSettings = {
     }
   )
 }
+
+lazy val micrositeSettings = Seq(
+  micrositeName := "selection",
+  micrositeDescription := "Transforming Subsets of Values within a Functor",
+  micrositeAuthor := "Christopher Davenport",
+  micrositeGithubOwner := "ChristopherDavenport",
+  micrositeGithubRepo := "selection",
+  micrositeBaseUrl := "/selection",
+  micrositeDocumentationUrl := "https://christopherdavenport.github.io/selection",
+  micrositeFooterText := None,
+  micrositeHighlightTheme := "atom-one-light",
+  micrositePalette := Map(
+    "brand-primary" -> "#3e5b95",
+    "brand-secondary" -> "#294066",
+    "brand-tertiary" -> "#2d5799",
+    "gray-dark" -> "#49494B",
+    "gray" -> "#7B7B7E",
+    "gray-light" -> "#E5E5E6",
+    "gray-lighter" -> "#F4F3F4",
+    "white-color" -> "#FFFFFF"
+  ),
+  fork in tut := true,
+  scalacOptions in Tut --= Seq(
+    "-Xfatal-warnings",
+    "-Ywarn-unused-import",
+    "-Ywarn-numeric-widen",
+    "-Ywarn-dead-code",
+    "-Ywarn-unused:imports",
+    "-Xlint:-missing-interpolator,_"
+  ),
+  libraryDependencies += "com.47deg" %% "github4s" % "0.19.0",
+  micrositePushSiteWith := GitHub4s,
+  micrositeGithubToken := sys.env.get("GITHUB_TOKEN")
+)
 
 lazy val mimaSettings = {
   import sbtrelease.Version
