@@ -61,6 +61,7 @@ val adjusted : List[Account] = {
     .exclude(_.balance < 0)
     .mapSelected(addInterest(usaRate)(_))
     .select(_.country === Canada)
+    .exclude(_.balance < 0)
     .mapSelected(addInterest(canRate)(_))
     .forgetSelection
 }
