@@ -15,9 +15,11 @@ import io.chrisdavenport.selection.implicits._
 import cats.effect._ // For Effect Display
 ```
 
-Now lets build some data
+Now let's build some data
 
 ```tut:book
+// Weirdness in this block is for companion object behavior in tut
+
 sealed trait Country; case object USA extends Country; case object Canada extends Country; object Country {
   implicit val showCountry: Show[Country] = semi.show
   implicit val eqCountry: Eq[Country] = semi.eq
@@ -29,7 +31,7 @@ final case class Account(name: String, country: Country, balance: Double); objec
 }
 ```
 
-So the accounts we are modeling in fairly simple. They have a name, country of origin and account balance. Let's make a 'database' of accounts as a simple list:
+So the accounts we are modeling are fairly simple. They have a name, country of origin and account balance. Let's make a 'database' of accounts as a simple list:
 
 ```tut:book
 val accounts: List[Account] = List(
@@ -116,7 +118,7 @@ val withCredit : List[Account] = {
 }
 ```
 
-They're also Bitraversable and Bifoldable, so we can perform operations with effects over each segement independely or
+They're also Bitraversable and Bifoldable, so we can perform operations with effects over each segement independently or
 perform different effectful operations over each type. Let's print out a warning to all users with a negative balance!
 
 ```tut:book
