@@ -27,7 +27,6 @@ lazy val docs = project.in(file("docs"))
     )
   )
   .dependsOn(core)
-  .enablePlugins(ScalaUnidocPlugin, GhpagesPlugin)
   .enablePlugins(MicrositesPlugin)
   .enablePlugins(TutPlugin)
 
@@ -124,8 +123,6 @@ lazy val releaseSettings = {
     }
   )
 }
-lazy val docsMappingsAPIDir =
-  settingKey[String]("Name of subdirectory in site target directory for api docs")
 
 lazy val micrositeSettings = Seq(
   micrositeName := "selection",
@@ -134,7 +131,7 @@ lazy val micrositeSettings = Seq(
   micrositeGithubOwner := "ChristopherDavenport",
   micrositeGithubRepo := "selection",
   micrositeBaseUrl := "/selection",
-  micrositeDocumentationUrl := "https://christopherdavenport.github.io/selection/latest/api/io/chrisdavenport/selection/",
+  micrositeDocumentationUrl := "https://www.javadoc.io/doc/io.chrisdavenport/selection_2.12",
   micrositeFooterText := None,
   micrositeHighlightTheme := "atom-one-light",
   micrositePalette := Map(
@@ -158,9 +155,7 @@ lazy val micrositeSettings = Seq(
   ),
   libraryDependencies += "com.47deg" %% "github4s" % "0.19.0",
   micrositePushSiteWith := GitHub4s,
-  micrositeGithubToken := sys.env.get("GITHUB_TOKEN"),
-  siteSubdirName in ScalaUnidoc := "latest/api",
-  addMappingsToSiteDir(mappings in (ScalaUnidoc, packageDoc), siteSubdirName in ScalaUnidoc)
+  micrositeGithubToken := sys.env.get("GITHUB_TOKEN")
 )
 
 lazy val mimaSettings = {
