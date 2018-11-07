@@ -1,3 +1,13 @@
+val catsV = "1.4.0"
+val specs2V = "4.3.5"
+
+val kindProjectorV = "0.9.8"
+val betterMonadicForV = "0.3.0-M4"
+
+// Docs
+val catsEffectV = "1.0.0"
+val kittensV = "1.2.0"
+
 lazy val selection = project.in(file("."))
   .settings(commonSettings, releaseSettings, skipOnPublishSettings)
   .aggregate(core, docs)
@@ -10,15 +20,16 @@ lazy val core = project.in(file("core"))
 
 lazy val docs = project.in(file("docs"))
   .settings(commonSettings, releaseSettings, skipOnPublishSettings, micrositeSettings)
+  .settings(
+    libraryDependencies ++= Seq(
+      "org.typelevel" %% "kittens"      % kittensV,
+      "org.typelevel" %% "cats-effect"  % catsEffectV
+    )
+  )
   .dependsOn(core)
   .enablePlugins(MicrositesPlugin)
   .enablePlugins(TutPlugin)
 
-val catsV = "1.4.0"
-val specs2V = "4.3.5"
-
-val kindProjectorV = "0.9.8"
-val betterMonadicForV = "0.3.0-M4"
 
 
 lazy val contributors = Seq(
@@ -115,7 +126,7 @@ lazy val releaseSettings = {
 
 lazy val micrositeSettings = Seq(
   micrositeName := "selection",
-  micrositeDescription := "Transforming Subsets of Values within a Functor",
+  micrositeDescription := "Functor Transformations for Scala",
   micrositeAuthor := "Christopher Davenport",
   micrositeGithubOwner := "ChristopherDavenport",
   micrositeGithubRepo := "selection",
