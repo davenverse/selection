@@ -8,7 +8,7 @@ trait  selection {
     def newSelection: Selection[F, A, A] = Selection.newSelection(fa)
     def newSelectionB[B]: Selection[F, B, A] = Selection.newSelectionB(fa)
   }
-  
+
   implicit class selectionNoConstraintOps[F[_], B, A](private val s: Selection[F, B, A]){
     def mapK[G[_]](f: F ~> G): Selection[G, B, A] = Selection.mapK(s)(f)
   }
@@ -34,6 +34,10 @@ trait  selection {
     def selectAll: Selection[F, A, A] = Selection.selectAll(s)
     def deselectAll: Selection[F, A, A] = Selection.deselectAll(s)
     def select(f: A => Boolean): Selection[F, A, A] = Selection.select(s)(f)
+  }
+
+  implicit class comonadOps[F[_]: Comonad, A](private val s: Selection[F, A, A]){
+    def selectWithContext(f: F[A] => Boolean): Selection[F, A, A] = Selection.selectWithContext(s)(f)
   }
 }
 
