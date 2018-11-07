@@ -66,10 +66,11 @@
     <span class="o">.</span><span class="n">exclude</span><span class="o">(</span><span class="k">_</span><span class="o">.</span><span class="n">balance</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="o">)</span>
     <span class="o">.</span><span class="n">mapSelected</span><span class="o">(</span><span class="n">addInterest</span><span class="o">(</span><span class="n">usaRate</span><span class="o">)(</span><span class="k">_</span><span class="o">))</span>
     <span class="o">.</span><span class="n">select</span><span class="o">(</span><span class="k">_</span><span class="o">.</span><span class="n">country</span> <span class="o">===</span> <span class="nc">Canada</span><span class="o">)</span>
+    <span class="o">.</span><span class="n">exclude</span><span class="o">(</span><span class="k">_</span><span class="o">.</span><span class="n">balance</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="o">)</span>
     <span class="o">.</span><span class="n">mapSelected</span><span class="o">(</span><span class="n">addInterest</span><span class="o">(</span><span class="n">canRate</span><span class="o">)(</span><span class="k">_</span><span class="o">))</span>
     <span class="o">.</span><span class="n">forgetSelection</span>
 <span class="o">}</span>
-<span class="c1">// adjusted: List[Account] = List(Account(Steve,Canada,37.400000000000006), Account(Cindy,USA,12.5), Account(Blake,USA,-6.0), Account(Carl,Canada,-17.6))
+<span class="c1">// adjusted: List[Account] = List(Account(Steve,Canada,37.400000000000006), Account(Cindy,USA,12.5), Account(Blake,USA,-6.0), Account(Carl,Canada,-16.0))
 </span></code></pre>
 </div>
 
