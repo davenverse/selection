@@ -1,6 +1,7 @@
 ---
-layout: docs
-title:  "Tutorial"
+layout: page
+title:  "tutorial"
+section: "tutorial"
 position: 1
 ---
 
