@@ -216,7 +216,14 @@ abstract private[selection] class SelectionInstances1 extends SelectionInstances
     }
 
   implicit def monadSelection[F[_]: Monad, B]: Monad[Selection[F, B, ?]]  =
-    new StackSafeMonad[Selection[F, B, ?]]{
+    new Monad[Selection[F, B, ?]]{
+      def tailRecM[A, C](a: A)(f: A => Selection[F,B,Either[A,C]]): Selection[F,B,C] = Selection(
+          Monad[F].tailRecM(a)(f(_).unwrap.map{
+            case Left(l) => Right(Left(l))
+            case Right(Left(a1)) => Left(a1)
+            case Right(Right(b)) => Right(Right(b))
+          })
+      )
       def pure[A](x: A): Selection[F,B,A] = Selection(x.pure[F].map(Either.right))
       def flatMap[A, C](fa: Selection[F,B,A])(f: A => Selection[F,B,C]):Selection[F,B,C] = 
         Selection(fa.unwrap.flatMap(_.fold(Either.left[B, C](_).pure[F], f(_).unwrap)))
