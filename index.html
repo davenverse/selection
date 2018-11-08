@@ -18,6 +18,12 @@
   <li>Deselect and return to your original functor using unify</li>
 </ul>
 
+<h2 id="when-shouldshouldnt-i-use-selection">When Should/Shouldn’t I Use Selection?</h2>
+
+<p>You can use selection whenever you’ve got a bunch of things and you want to operate over just a few of them at a time. You can do everything that selection provides by combining a bunch of predicates with map, but it gets messy really quick; selection provides a clean interface for this sort of operation.</p>
+
+<p>You shouldn’t use selections when you’re looking for a monadic interface, selections works at the value level typically chaining commands together, while it can be used as a monad transformer if the underlying functor is also a monad, however at that point you may be better served using <a href="https://github.com/typelevel/cats/blob/master/core/src/main/scala/cats/data/EitherT.scala">EitherT</a></p>
+
 <h2 id="quick-start">Quick Start</h2>
 
 <p>To use selection in an existing SBT project with Scala 2.11 or a later version, add the following dependencies to your
@@ -27,6 +33,42 @@
   <span class="s">"io.chrisdavenport"</span> <span class="o">%%</span> <span class="s">"selection"</span> <span class="o">%</span> <span class="s">"&lt;version&gt;"</span>
 <span class="o">)</span>
 </code></pre>
+</div>
+
+<h2 id="quick-example">Quick Example</h2>
+
+<p>First Imports.</p>
+
+<div class="language-scala highlighter-rouge"><pre class="highlight"><code><span class="k">import</span> <span class="nn">cats.implicits._</span> <span class="c1">// For Syntax Enhancements
+</span><span class="k">import</span> <span class="nn">io.chrisdavenport.selection._</span> <span class="c1">// Selection Type
+</span><span class="k">import</span> <span class="nn">io.chrisdavenport.selection.implicits._</span> <span class="c1">// Implicit Syntax On Functors
+</span></code></pre>
+</div>
+
+<p>Here’s how it looks.</p>
+
+<div class="language-scala highlighter-rouge"><pre class="highlight"><code><span class="k">val</span> <span class="n">xs</span> <span class="k">=</span> <span class="nc">List</span><span class="o">(</span><span class="mi">1</span><span class="o">,</span><span class="mi">2</span><span class="o">,</span><span class="mi">3</span><span class="o">,</span><span class="mi">4</span><span class="o">,</span><span class="mi">5</span><span class="o">,</span><span class="mi">6</span><span class="o">)</span>
+<span class="c1">// xs: List[Int] = List(1, 2, 3, 4, 5, 6)
+</span>
+<span class="o">{</span>
+  <span class="n">xs</span><span class="o">.</span><span class="n">newSelection</span>
+    <span class="o">.</span><span class="n">select</span><span class="o">(</span><span class="k">_</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">===</span> <span class="mi">0</span><span class="o">)</span>
+    <span class="o">.</span><span class="n">mapSelected</span><span class="o">(</span><span class="k">_</span> <span class="o">+</span> <span class="mi">100</span><span class="o">)</span>
+    <span class="o">.</span><span class="n">bimap</span><span class="o">(</span><span class="n">odd</span> <span class="k">=&gt;</span> <span class="n">show</span><span class="s">"Odd: $odd"</span><span class="o">,</span> <span class="n">even</span> <span class="k">=&gt;</span> <span class="n">show</span><span class="s">"Even: $even"</span><span class="o">)</span>
+    <span class="o">.</span><span class="n">forgetSelection</span>
+<span class="o">}</span>
+<span class="c1">// res0: List[String] = List(Odd: 1, Even: 102, Odd: 3, Even: 104, Odd: 5, Even: 106)
+</span>
+<span class="o">{</span>
+  <span class="nc">Selection</span><span class="o">.</span><span class="n">newSelection</span><span class="o">(</span><span class="n">xs</span><span class="o">)</span>
+    <span class="o">.</span><span class="n">select</span><span class="o">(</span><span class="k">_</span> <span class="o">&gt;</span> <span class="mi">3</span><span class="o">)</span>
+    <span class="o">.</span><span class="n">mapSelected</span><span class="o">(</span><span class="k">_</span> <span class="o">+</span> <span class="mi">10</span><span class="o">)</span>
+    <span class="o">.</span><span class="n">exclude</span><span class="o">(</span><span class="k">_</span> <span class="o">&lt;</span> <span class="mi">15</span><span class="o">)</span>
+    <span class="o">.</span><span class="n">mapSelected</span><span class="o">(</span><span class="k">_</span> <span class="o">+</span> <span class="mi">10</span><span class="o">)</span>
+    <span class="o">.</span><span class="n">forgetSelection</span>
+<span class="o">}</span>
+<span class="c1">// res1: List[Int] = List(1, 2, 3, 14, 25, 26)
+</span></code></pre>
 </div>
 </div></div></section><section class="technologies"><div class="container"><div class="row"></div></div></section></main><footer id="site-footer"><div class="container"><div class="row"><div class="col-xs-6"><p>selection is designed and developed by <a href="https://github.com/ChristopherDavenport/selection" target="_blank">Christopher Davenport</a></p></div><div class="col-xs-6"><p class="text-right"><a href="https://github.com/ChristopherDavenport/selection"><span class="fa fa-github"></span>View on GitHub</a></p></div></div></div></footer><script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script><script src="/selection/highlight/highlight.pack.js"></script><script>hljs.configure({
 languages:['scala','java','bash']
