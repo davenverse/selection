@@ -92,7 +92,7 @@ americans.getSelected
 americans.getUnselected
 ```
 
-We've got our americans selected, but Blake has a negative account balance! Let's `exclude` any accounts with a negative balance. `exclude` keeps the current selection, but removes any elements that fial the predicate. There's also an `include` combinator which will add any unselected elements which do pass the predicate(assuming you want that).
+We've got our americans selected, but Blake has a negative account balance! Let's `exclude` any accounts with a negative balance. `exclude` keeps the current selection, but removes any elements that fail the predicate. There's also an `include` combinator which will add any unselected elements which do pass the predicate(assuming you want that).
 
 ```tut:book
 val americansPositive = americans.exclude(_.balance < 0)
