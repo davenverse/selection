@@ -31,6 +31,6 @@ class SelectionTests extends CatsSuite {
  // * -> * -> *
   checkAll("Selection", BifoldableTests[Selection[List, ?, ?]].bifoldable[Int, Int, Int])
   checkAll("Selection", BifunctorTests[Selection[List, ?, ?]].bifunctor[Int, Int, Int, Int, Int, Int])
-  checkAll("Selection", BitraverseTests[Selection[List, ?, ?]].bitraverse[List, Int, Int, Int, Int, Int, Int])
+  checkAll("Selection", BitraverseTests[Selection[List, ?, ?]].bitraverse[Id, Int, Int, Int, Int, Int, Int])
   
 }
