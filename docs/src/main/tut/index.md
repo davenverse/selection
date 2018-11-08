@@ -20,6 +20,12 @@ Selection is a wrapper around Functors which adds several combinators and intere
 - Extract all unselected or selected elements to a list
 - Deselect and return to your original functor using unify
 
+## When Should/Shouldn't I Use Selection?
+
+You can use selection whenever you've got a bunch of things and you want to operate over just a few of them at a time. You can do everything that selection provides by combining a bunch of predicates with map, but it gets messy really quick; selection provides a clean interface for this sort of operation.
+
+You shouldn't use selections when you're looking for a monadic interface, selections works at the value level typically chaining commands together, while it can be used as a monad transformer if the underlying functor is also a monad, however at that point you may be better served using [EitherT](https://github.com/typelevel/cats/blob/master/core/src/main/scala/cats/data/EitherT.scala)
+
 ## Quick Start
 
 To use selection in an existing SBT project with Scala 2.11 or a later version, add the following dependencies to your
@@ -29,4 +35,37 @@ To use selection in an existing SBT project with Scala 2.11 or a later version, 
 libraryDependencies ++= Seq(
   "io.chrisdavenport" %% "selection" % "<version>"
 )
+```
+
+## Quick Example
+
+First Imports.
+
+```tut:silent
+import cats.implicits._ // For Syntax Enhancements
+import io.chrisdavenport.selection._ // Selection Type
+import io.chrisdavenport.selection.implicits._ // Implicit Syntax On Functors
+```
+
+Here's how it looks.
+
+```tut:book
+val xs = List(1,2,3,4,5,6)
+
+{
+  xs.newSelection
+    .select(_ % 2 === 0)
+    .mapSelected(_ + 100)
+    .bimap(odd => show"Odd: $odd", even => show"Even: $even")
+    .forgetSelection
+}
+
+{
+  Selection.newSelection(xs)
+    .select(_ > 3)
+    .mapSelected(_ + 10)
+    .exclude(_ < 15)
+    .mapSelected(_ + 10)
+    .forgetSelection
+}
 ```
