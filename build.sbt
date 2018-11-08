@@ -1,7 +1,8 @@
 import sbtcrossproject.CrossPlugin.autoImport.{crossProject, CrossType}
 
 val catsV = "1.4.0"
-val specs2V = "4.3.5"
+val catsScalaCheckV = "0.1.0"
+val specs2V = "4.1.0"
 
 val kindProjectorV = "0.9.8"
 val betterMonadicForV = "0.3.0-M4"
@@ -37,8 +38,6 @@ lazy val docs = project.in(file("docs"))
   .enablePlugins(MicrositesPlugin)
   .enablePlugins(TutPlugin)
 
-
-
 lazy val contributors = Seq(
   "ChristopherDavenport" -> "Christopher Davenport"
 )
@@ -61,10 +60,18 @@ lazy val commonSettings = Seq(
       "-sourcepath", (baseDirectory in LocalRootProject).value.getAbsolutePath,
       "-doc-source-url", "https://github.com/christopherdavenport/selection/blob/v" + version.value + "€{FILE_PATH}.scala"
   ),
+
+  dependencyUpdatesFilter -= moduleFilter(organization = "javax.servlet"), // servlet-4.0 is not yet supported by jetty-9 or tomcat-9, so don't accidentally depend on its new features
+  dependencyUpdatesFilter -= moduleFilter(organization = "org.scalacheck"), // scalacheck-1.14 is incompatible with cats-laws-1.1
+  dependencyUpdatesFilter -= moduleFilter(organization = "org.specs2"), // specs2-4.2 is incompatible with scalacheck-1.13
+
   addCompilerPlugin("org.spire-math" % "kind-projector" % kindProjectorV cross CrossVersion.binary),
   addCompilerPlugin("com.olegpy" %% "better-monadic-for" % betterMonadicForV),
+  
   libraryDependencies ++= Seq(
     "org.typelevel"               %%% "cats-core"                  % catsV,
+    "org.typelevel"               %%% "cats-testkit"               % catsV         % Test,
+    // "io.chrisdavenport"           %%% "cats-scalacheck"            % catsScalaCheckV % Test,
     "org.specs2"                  %%% "specs2-core"                % specs2V       % Test,
     "org.specs2"                  %%% "specs2-scalacheck"          % specs2V       % Test
   )
