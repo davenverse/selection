@@ -5,7 +5,7 @@ import cats.implicits._
 
 /**
   * A selection wraps a Functor f and has an unselected type b and a selected type a
-  * import io.chrisdavenport.selection.implicits._ for method syntax enhancements
+  *
   */
 final case class Selection[F[_], B, A](unwrap: F[Either[B, A]]) extends AnyVal {
 
@@ -119,6 +119,10 @@ final case class Selection[F[_], B, A](unwrap: F[Either[B, A]]) extends AnyVal {
 
 }
 
+/**
+  * Selection Companion Object Holds the constructor methods
+  * and typeclass instances.
+  */
 object Selection extends SelectionInstances {
 
   // Constructor
