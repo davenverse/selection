@@ -1,25 +1,42 @@
+import sbtcrossproject.CrossPlugin.autoImport.{crossProject, CrossType}
+
+val catsV = "1.4.0"
+val catsScalaCheckV = "0.1.0"
+val specs2V = "4.1.0"
+
+val kindProjectorV = "0.9.8"
+val betterMonadicForV = "0.3.0-M4"
+
+// Docs
+val catsEffectV = "1.0.0"
+val kittensV = "1.2.0"
+
 lazy val selection = project.in(file("."))
   .settings(commonSettings, releaseSettings, skipOnPublishSettings)
-  .aggregate(core, docs)
+  .aggregate(coreJVM, coreJS, docs)
 
-lazy val core = project.in(file("core"))
+lazy val core = crossProject(JSPlatform, JVMPlatform)
+  .crossType(CrossType.Pure)
+  .in(file("core"))
   .settings(commonSettings, releaseSettings)
   .settings(
     name := "selection"
   )
 
+lazy val coreJVM = core.jvm
+lazy val coreJS  = core.js
+
 lazy val docs = project.in(file("docs"))
   .settings(commonSettings, releaseSettings, skipOnPublishSettings, micrositeSettings)
-  .dependsOn(core)
+  .settings(
+    libraryDependencies ++= Seq(
+      "org.typelevel" %% "kittens"      % kittensV,
+      "org.typelevel" %% "cats-effect"  % catsEffectV
+    )
+  )
+  .dependsOn(coreJVM)
   .enablePlugins(MicrositesPlugin)
   .enablePlugins(TutPlugin)
-
-val catsV = "1.4.0"
-val specs2V = "4.3.5"
-
-val kindProjectorV = "0.9.8"
-val betterMonadicForV = "0.3.0-M4"
-
 
 lazy val contributors = Seq(
   "ChristopherDavenport" -> "Christopher Davenport"
@@ -38,12 +55,24 @@ lazy val commonSettings = Seq(
   crossScalaVersions := Seq(scalaVersion.value, "2.11.12"),
   scalacOptions += "-Yrangepos",
 
+  scalacOptions in (Compile, doc) ++= Seq(
+      "-groups",
+      "-sourcepath", (baseDirectory in LocalRootProject).value.getAbsolutePath,
+      "-doc-source-url", "https://github.com/christopherdavenport/selection/blob/v" + version.value + "€{FILE_PATH}.scala"
+  ),
+
+  dependencyUpdatesFilter -= moduleFilter(organization = "org.scalacheck"), // scalacheck-1.14 is incompatible with cats-laws-1.1
+  dependencyUpdatesFilter -= moduleFilter(organization = "org.specs2"), // specs2-4.2 is incompatible with scalacheck-1.13
+
   addCompilerPlugin("org.spire-math" % "kind-projector" % kindProjectorV cross CrossVersion.binary),
   addCompilerPlugin("com.olegpy" %% "better-monadic-for" % betterMonadicForV),
+  
   libraryDependencies ++= Seq(
-    "org.typelevel"               %% "cats-core"                  % catsV,
-    "org.specs2"                  %% "specs2-core"                % specs2V       % Test,
-    "org.specs2"                  %% "specs2-scalacheck"          % specs2V       % Test
+    "org.typelevel"               %%% "cats-core"                  % catsV,
+    "org.typelevel"               %%% "cats-testkit"               % catsV         % Test,
+    // "io.chrisdavenport"           %%% "cats-scalacheck"            % catsScalaCheckV % Test,
+    "org.specs2"                  %%% "specs2-core"                % specs2V       % Test,
+    "org.specs2"                  %%% "specs2-scalacheck"          % specs2V       % Test
   )
 )
 
@@ -113,39 +142,47 @@ lazy val releaseSettings = {
   )
 }
 
-lazy val micrositeSettings = Seq(
-  micrositeName := "selection",
-  micrositeDescription := "Transforming Subsets of Values within a Functor",
-  micrositeAuthor := "Christopher Davenport",
-  micrositeGithubOwner := "ChristopherDavenport",
-  micrositeGithubRepo := "selection",
-  micrositeBaseUrl := "/selection",
-  micrositeDocumentationUrl := "https://christopherdavenport.github.io/selection",
-  micrositeFooterText := None,
-  micrositeHighlightTheme := "atom-one-light",
-  micrositePalette := Map(
-    "brand-primary" -> "#3e5b95",
-    "brand-secondary" -> "#294066",
-    "brand-tertiary" -> "#2d5799",
-    "gray-dark" -> "#49494B",
-    "gray" -> "#7B7B7E",
-    "gray-light" -> "#E5E5E6",
-    "gray-lighter" -> "#F4F3F4",
-    "white-color" -> "#FFFFFF"
-  ),
-  fork in tut := true,
-  scalacOptions in Tut --= Seq(
-    "-Xfatal-warnings",
-    "-Ywarn-unused-import",
-    "-Ywarn-numeric-widen",
-    "-Ywarn-dead-code",
-    "-Ywarn-unused:imports",
-    "-Xlint:-missing-interpolator,_"
-  ),
-  libraryDependencies += "com.47deg" %% "github4s" % "0.19.0",
-  micrositePushSiteWith := GitHub4s,
-  micrositeGithubToken := sys.env.get("GITHUB_TOKEN")
-)
+lazy val micrositeSettings = {
+  import microsites._
+  Seq(
+    micrositeName := "selection",
+    micrositeDescription := "Functor Transformations for Scala",
+    micrositeAuthor := "Christopher Davenport",
+    micrositeGithubOwner := "ChristopherDavenport",
+    micrositeGithubRepo := "selection",
+    micrositeBaseUrl := "/selection",
+    micrositeDocumentationUrl := "https://www.javadoc.io/doc/io.chrisdavenport/selection_2.12",
+    micrositeFooterText := None,
+    micrositeHighlightTheme := "atom-one-light",
+    micrositePalette := Map(
+      "brand-primary" -> "#3e5b95",
+      "brand-secondary" -> "#294066",
+      "brand-tertiary" -> "#2d5799",
+      "gray-dark" -> "#49494B",
+      "gray" -> "#7B7B7E",
+      "gray-light" -> "#E5E5E6",
+      "gray-lighter" -> "#F4F3F4",
+      "white-color" -> "#FFFFFF"
+    ),
+    fork in tut := true,
+    scalacOptions in Tut --= Seq(
+      "-Xfatal-warnings",
+      "-Ywarn-unused-import",
+      "-Ywarn-numeric-widen",
+      "-Ywarn-dead-code",
+      "-Ywarn-unused:imports",
+      "-Xlint:-missing-interpolator,_"
+    ),
+    libraryDependencies += "com.47deg" %% "github4s" % "0.19.0",
+    micrositePushSiteWith := GitHub4s,
+    micrositeGithubToken := sys.env.get("GITHUB_TOKEN"),
+    micrositeExtraMdFiles := Map(
+        file("CHANGELOG.md")        -> ExtraMdFileConfig("changelog.md", "page", Map("title" -> "changelog", "section" -> "changelog", "position" -> "100")),
+        file("CODE_OF_CONDUCT.md")  -> ExtraMdFileConfig("code-of-conduct.md",   "page", Map("title" -> "code of conduct",   "section" -> "code of conduct",   "position" -> "101")),
+        file("LICENSE")             -> ExtraMdFileConfig("license.md",   "page", Map("title" -> "license",   "section" -> "license",   "position" -> "102"))
+    )
+  )
+}
 
 lazy val mimaSettings = {
   import sbtrelease.Version
