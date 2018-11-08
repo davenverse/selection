@@ -61,7 +61,6 @@ lazy val commonSettings = Seq(
       "-doc-source-url", "https://github.com/christopherdavenport/selection/blob/v" + version.value + "€{FILE_PATH}.scala"
   ),
 
-  dependencyUpdatesFilter -= moduleFilter(organization = "javax.servlet"), // servlet-4.0 is not yet supported by jetty-9 or tomcat-9, so don't accidentally depend on its new features
   dependencyUpdatesFilter -= moduleFilter(organization = "org.scalacheck"), // scalacheck-1.14 is incompatible with cats-laws-1.1
   dependencyUpdatesFilter -= moduleFilter(organization = "org.specs2"), // specs2-4.2 is incompatible with scalacheck-1.13
 
