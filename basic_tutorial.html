@@ -101,7 +101,7 @@
 </span></code></pre>
 </div>
 
-<p>We’ve got our americans selected, but Blake has a negative account balance! Let’s <code class="highlighter-rouge">exclude</code> any accounts with a negative balance. <code class="highlighter-rouge">exclude</code> keeps the current selection, but removes any elements that fial the predicate. There’s also an <code class="highlighter-rouge">include</code> combinator which will add any unselected elements which do pass the predicate(assuming you want that).</p>
+<p>We’ve got our americans selected, but Blake has a negative account balance! Let’s <code class="highlighter-rouge">exclude</code> any accounts with a negative balance. <code class="highlighter-rouge">exclude</code> keeps the current selection, but removes any elements that fail the predicate. There’s also an <code class="highlighter-rouge">include</code> combinator which will add any unselected elements which do pass the predicate(assuming you want that).</p>
 
 <div class="language-scala highlighter-rouge"><pre class="highlight"><code><span class="k">val</span> <span class="n">americansPositive</span> <span class="k">=</span> <span class="n">americans</span><span class="o">.</span><span class="n">exclude</span><span class="o">(</span><span class="k">_</span><span class="o">.</span><span class="n">balance</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="o">)</span>
 <span class="c1">// americansPositive: io.chrisdavenport.selection.Selection[List,Account,Account] = Selection(List(Left(Account(Steve,Canada,34.0)), Right(Account(Cindy,USA,10.0)), Left(Account(Blake,USA,-6.0)), Left(Account(Carl,Canada,-16.0))))
