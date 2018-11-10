@@ -60,16 +60,16 @@ final case class Selection[F[_], B, A](unwrap: F[Either[B, A]]) extends AnyVal {
     Selection(f(unwrap))
 
   /**
-    * Filter Out Values Not Matching a Predicate into the unselected side
+    * Exclude Values Not Present in the codomain
     */
-  def mapFilter[C](f: A => Option[C])(implicit F: Functor[F], ev: A =:= B): Selection[F, B, C] = 
+  def mapExclude[C](f: A => Option[C])(implicit F: Functor[F], ev: A =:= B): Selection[F, B, C] = 
     modifySelection(_.map(_.flatMap(a => f(a).fold(Either.left[B, C](ev(a)))(Either.right))))
 
   /**
-    * Similar to mapFilter but a partial Function
+    * Similar to mapExclude but a partial Function
     */
-  def collect[C](f: PartialFunction[A, C])(implicit F: Functor[F], ev: A =:= B): Selection[F, B, C] =
-    mapFilter(f.lift)
+  def collectExclude[C](f: PartialFunction[A, C])(implicit F: Functor[F], ev: A =:= B): Selection[F, B, C] =
+    mapExclude(f.lift)
   
   /**
     * Drops selection from your functor returning all values (selected or not).
