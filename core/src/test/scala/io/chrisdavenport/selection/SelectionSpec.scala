@@ -38,6 +38,18 @@ object SelectionSpec extends mutable.Specification with ScalaCheck {
     "return only values matching a predicate with select" >> prop { l: List[Int] => 
       l.newSelection.select(_ > 100).getSelected must_=== l.filter(_ > 100)
     }
+    "selected must be empty if mapExclude is None" >> prop { l: List[Int] => 
+      l.newSelection.mapExclude(_ => None).getSelected must_=== List.empty
+    }
+    "excluded must be all values if mapExclude is None" >> prop { l: List[Int] => 
+      l.newSelection.mapExclude(_ => None).getUnselected must_=== l
+    }
+    "selected must be all values if mapExclude is pure" >> prop {l: List[Int] => 
+      l.newSelection.mapExclude(_.pure[Option]).getSelected must_=== l
+    }
+    "collect must only collect values matching the partial" >> prop {l: List[Option[Int]] => 
+      l.newSelection.collectExclude{ case Some(i) => i}.getSelected must_=== l.flattenOption
+    }
   }
 
 }
