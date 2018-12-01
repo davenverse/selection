@@ -1,6 +1,6 @@
 import sbtcrossproject.CrossPlugin.autoImport.{crossProject, CrossType}
 
-val catsV = "1.4.0"
+val catsV = "1.5.0"
 val catsScalaCheckV = "0.1.0"
 val specs2V = "4.1.0"
 
