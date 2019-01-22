@@ -8,7 +8,7 @@ val kindProjectorV = "0.9.9"
 val betterMonadicForV = "0.3.0-M4"
 
 // Docs
-val catsEffectV = "1.1.0"
+val catsEffectV = "1.2.0"
 val kittensV = "1.2.0"
 
 lazy val selection = project.in(file("."))
