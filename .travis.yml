@@ -20,7 +20,6 @@ install:
 
 script:
   - sbt ++$TRAVIS_SCALA_VERSION test
-  - sbt ++$TRAVIS_SCALA_VERSION undeclaredCompileDependenciesTest
   - test $TRAVIS_SCALA_VERSION == "2.13.0-M5" || sbt ++$TRAVIS_SCALA_VERSION mimaReportBinaryIssues
   - test $TRAVIS_SCALA_VERSION == "2.13.0-M5" || sbt ++$TRAVIS_SCALA_VERSION docs/makeMicrosite
 
