@@ -9,7 +9,7 @@ val betterMonadicForV = "0.3.0-M4"
 
 // Docs
 val catsEffectV = "1.2.0"
-val kittensV = "1.2.0"
+val kittensV = "1.2.1"
 
 lazy val selection = project.in(file("."))
   .settings(commonSettings, releaseSettings, skipOnPublishSettings)
