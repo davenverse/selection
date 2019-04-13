@@ -5,7 +5,7 @@ val catsScalaCheckV = "0.1.0"
 val specs2V = "4.1.0"
 
 val kindProjectorV = "0.9.10"
-val betterMonadicForV = "0.3.0-M4"
+val betterMonadicForV = "0.3.0"
 
 // Docs
 val catsEffectV = "1.2.0"
