@@ -12,6 +12,7 @@ val catsEffectV = "1.3.1"
 val kittensV = "1.2.1"
 
 lazy val selection = project.in(file("."))
+  .disablePlugins(MimaPlugin)
   .settings(commonSettings, releaseSettings, skipOnPublishSettings)
   .aggregate(coreJVM, coreJS, docs)
 
@@ -216,6 +217,7 @@ lazy val mimaSettings = {
   lazy val extraVersions: Set[String] = Set()
 
   Seq(
+    mimaFailOnNoPrevious := false,
     mimaFailOnProblem := mimaVersions(version.value).toList.headOption.isDefined,
     mimaPreviousArtifacts := (mimaVersions(version.value) ++ extraVersions)
       .filterNot(excludedVersions.contains(_))
