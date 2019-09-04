@@ -4,7 +4,7 @@ val catsV = "1.6.1"
 val catsScalaCheckV = "0.1.0"
 val specs2V = "4.1.0"
 
-val kindProjectorV = "0.9.10"
+val kindProjectorV = "0.10.3"
 val betterMonadicForV = "0.3.1"
 
 // Docs
@@ -59,7 +59,7 @@ lazy val commonSettings = Seq(
   dependencyUpdatesFilter -= moduleFilter(organization = "org.scalacheck"), // scalacheck-1.14 is incompatible with cats-laws-1.1
   dependencyUpdatesFilter -= moduleFilter(organization = "org.specs2"), // specs2-4.2 is incompatible with scalacheck-1.13
 
-  addCompilerPlugin("org.spire-math" % "kind-projector" % kindProjectorV cross CrossVersion.binary),
+  addCompilerPlugin("org.typelevel" % "kind-projector" % kindProjectorV cross CrossVersion.binary),
   addCompilerPlugin("com.olegpy" %% "better-monadic-for" % betterMonadicForV),
   
   libraryDependencies ++= Seq(
