@@ -9,7 +9,7 @@ val betterMonadicForV = "0.3.1"
 
 // Docs
 val catsEffectV = "1.3.1"
-val kittensV = "1.2.1"
+val kittensV = "2.0.0"
 
 lazy val selection = project.in(file("."))
   .disablePlugins(MimaPlugin)
