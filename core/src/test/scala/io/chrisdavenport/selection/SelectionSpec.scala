@@ -1,54 +1,91 @@
 package io.chrisdavenport.selection
 
-import org.specs2._
 import cats.implicits._
 import implicits._
+import org.scalacheck.Prop._
 
-object SelectionSpec extends mutable.Specification with ScalaCheck {
+class SelectionSuite extends munit.DisciplineSuite {
 
-  "Selection" should {
-    "return original functor after creation and forget" >> prop { l: List[Int] => 
-      l.newSelection.forgetSelection must_=== l
+  test("return original functor after creation and forget") {
+    forAll { l: List[Int] =>
+      assertEquals(l.newSelection.forgetSelection, l)
     }
-    "return original functor after creation and getSelected" >> prop { l: List[Int] => 
-      l.newSelection.getSelected must_=== l
+  }
+  test("return original functor after creation and getSelected") {
+    forAll { l: List[Int] =>
+      assertEquals(l.newSelection.getSelected, l)
     }
-
-    "return no values unselected of a newly created selectin" >> prop { l: List[Int] => 
-      l.newSelection.getUnselected must_=== List.empty[Int]
+  }
+  test("return no values unselected of a newly created selectin") {
+    forAll { l: List[Int] =>
+      assertEquals(l.newSelection.getUnselected, List.empty[Int])
     }
-    "return all values unselected after inversion" >> prop { l: List[Int] => 
-      l.newSelection.invertSelection.getUnselected must_=== l
+  }
+  test("return all values unselected after inversion") {
+    forAll { l: List[Int] =>
+      assertEquals(l.newSelection.invertSelection.getUnselected, l)
     }
-    "deselectAll must exclude all values" >> prop { l: List[Int] => 
-      l.newSelection.deselectAll.getSelected must_=== List.empty[Int]
+  }
+  test("deselectAll must exclude all values") {
+    forAll { l: List[Int] =>
+      assertEquals(l.newSelection.deselectAll.getSelected, List.empty[Int])
     }
-
-    "selectAll must include all values" >> prop {l : List[Int] => 
-      l.newSelection.invertSelection.selectAll.getSelected must_=== l
+  }
+  test("selectAll must include all values") {
+    forAll { l: List[Int] =>
+      assertEquals(l.newSelection.invertSelection.selectAll.getSelected, l)
     }
-
-    "exclude must exclude values on a predicate" >> prop {l : List[Int] => 
-      l.newSelection.exclude(_ < 100).getUnselected.forall(_ < 100) must_=== true
+  }
+  test("exclude must exclude values on a predicate") {
+    forAll { l: List[Int] =>
+      assertEquals(
+        l.newSelection.exclude(_ < 100).getUnselected.forall(_ < 100),
+        true
+      )
     }
-    "include must include values on a predicate" >> prop {l: List[Int] => 
-      l.newSelection.invertSelection.include(_ < 100).getSelected.forall(_ < 100) must_=== true
+  }
+  test("include must include values on a predicate") {
+    forAll { l: List[Int] =>
+      assertEquals(
+        l.newSelection.invertSelection
+          .include(_ < 100)
+          .getSelected
+          .forall(_ < 100),
+        true
+      )
     }
-
-    "return only values matching a predicate with select" >> prop { l: List[Int] => 
-      l.newSelection.select(_ > 100).getSelected must_=== l.filter(_ > 100)
+  }
+  test("return only values matching a predicate with select") {
+    forAll { l: List[Int] =>
+      assertEquals(
+        l.newSelection.select(_ > 100).getSelected,
+        l.filter(_ > 100)
+      )
     }
-    "selected must be empty if mapExclude is None" >> prop { l: List[Int] => 
-      l.newSelection.mapExclude(_ => None).getSelected must_=== List.empty
+  }
+  test("selected must be empty if mapExclude is None") {
+    forAll { l: List[Int] =>
+      assertEquals(l.newSelection.mapExclude(_ => None).getSelected, List.empty)
     }
-    "excluded must be all values if mapExclude is None" >> prop { l: List[Int] => 
-      l.newSelection.mapExclude(_ => None).getUnselected must_=== l
+  }
+  test("excluded must be all values if mapExclude is None") {
+    forAll { l: List[Int] =>
+      assertEquals(l.newSelection.mapExclude(_ => None).getUnselected, l)
     }
-    "selected must be all values if mapExclude is pure" >> prop {l: List[Int] => 
-      l.newSelection.mapExclude(_.pure[Option]).getSelected must_=== l
+  }
+  test("selected must be all values if mapExclude is pure") {
+    forAll { l: List[Int] =>
+      assertEquals(l.newSelection.mapExclude(_.pure[Option]).getSelected, l)
     }
-    "collect must only collect values matching the partial" >> prop {l: List[Option[Int]] => 
-      l.newSelection.collectExclude{ case Some(i) => i}.getSelected must_=== l.flattenOption
+  }
+  test("collect must only collect values matching the partial") {
+    forAll { l: List[Option[Int]] =>
+      assertEquals(
+        l.newSelection.collectExclude { case Some(i) =>
+          i
+        }.getSelected,
+        l.flattenOption
+      )
     }
   }
 
