@@ -2,7 +2,7 @@
 
 selection is a Scala library for transforming subsets of values within a functor. Inspired by [selections](https://github.com/ChrisPenner/selections)
 
-## [Head on over to the microsite](https://christopherdavenport.github.io/selection)
+## [Head on over to the microsite](https://davenverse.github.io/selection/)
 
 ## Quick Start
 
