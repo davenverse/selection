@@ -23,6 +23,7 @@ lazy val core = crossProject(JSPlatform, JVMPlatform)
     libraryDependencies ++= Seq(
       "org.typelevel"               %%% "cats-core"                  % catsV,
       "org.typelevel"               %%% "cats-testkit"               % catsV         % Test,
+      "org.typelevel"               %%% "discipline-specs2"          % "1.1.6"       % Test,
       ("org.specs2"                  %%% "specs2-scalacheck"          % specs2V       % Test)
         .cross(CrossVersion.for3Use2_13)
         .exclude("org.scalacheck", "scalacheck_2.13")
