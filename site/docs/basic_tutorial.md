@@ -7,9 +7,9 @@ position: 1
 
 To start the process lets get our imports out of the way.
 
-```tut:silent
+```scala mdoc:silent
 import cats._
-import cats.implicits._
+import cats.syntax.all._
 import cats.derived._ // For Kittens Derivation
 import io.chrisdavenport.selection._
 import io.chrisdavenport.selection.implicits._
@@ -18,23 +18,23 @@ import cats.effect._ // For Effect Display
 
 Now let's build some data
 
-```tut:book
+```scala mdoc
 // Weirdness in this block is for companion object behavior in tut
 
 sealed trait Country; case object USA extends Country; case object Canada extends Country; object Country {
-  implicit val showCountry: Show[Country] = semi.show
-  implicit val eqCountry: Eq[Country] = semi.eq
+  implicit val showCountry: Show[Country] = semiauto.show
+  implicit val eqCountry: Eq[Country] = semiauto.eq
 }
 
 final case class Account(name: String, country: Country, balance: Double); object Account {
-  implicit val showCountry: Show[Account] = semi.show
-  implicit val eqCountry: Eq[Account] = semi.eq
+  implicit val showCountry: Show[Account] = semiauto.show
+  implicit val eqCountry: Eq[Account] = semiauto.eq
 }
 ```
 
 So the accounts we are modeling are fairly simple. They have a name, country of origin and account balance. Let's make a 'database' of accounts as a simple list:
 
-```tut:book
+```scala mdoc
 val accounts: List[Account] = List(
   Account("Steve" , Canada  , 34D),
   Account("Cindy" , USA     , 10D),
@@ -47,7 +47,7 @@ Great! So far so good. Now we see where selections come in handy, let's say we w
 
 One additional complication! USA and Canadian accounts get different interest rates! No problem though, let's see what we can do!
 
-```tut:book
+```scala mdoc
 type Rate = Double
 
 def addInterest(rate: Rate)(user: Account): Account = user.copy(balance = user.balance * rate)
@@ -70,7 +70,7 @@ val adjusted : List[Account] = {
 
 You can see it made the proper adjustments without touching the negative accounts! Since, quite a bit just happened, lets break it down a bit.
 
-```tut:book
+```scala mdoc
 val americans : SelectionA[List, Account] = {
   accounts.newSelection.select(_.country === USA)
 }
@@ -86,7 +86,7 @@ If we wanted to select the Canadians we could write a predicate for that, or sin
 
 We can now use `getSelected` and `getUnselected` to get a list of USA or Canadian accounts respectively, not how the `Right`'s and `Left`'s disappear whenever we stop working within a Selection:
 
-```tut:book
+```scala mdoc
 americans.getSelected
 
 americans.getUnselected
@@ -94,19 +94,19 @@ americans.getUnselected
 
 We've got our americans selected, but Blake has a negative account balance! Let's `exclude` any accounts with a negative balance. `exclude` keeps the current selection, but removes any elements that fail the predicate. There's also an `include` combinator which will add any unselected elements which do pass the predicate(assuming you want that).
 
-```tut:book
+```scala mdoc
 val americansPositive = americans.exclude(_.balance < 0)
 ```
 
 Now we can finally make our transformation, `mapSelected` is provided if you want a nicely named combinator, however its just a synonym for `map`.
 
-```tut:book
+```scala mdoc
 val americansAdjusted = americansPositive.mapSelected(addInterest(usaRate)(_))
 ```
 
 All selections are `Bifunctors`, so you can `bimap` over the unselected and selected values respectively if you like. Let's say there was a banking error in our user's favour (it happens all the time I swear). All Americans get a $10 credit, all Canadians get a $7 credit!
 
-```tut:book
+```scala mdoc
 def adjustBalance(adjustment: Double => Double)(account: Account): Account = {
   account.copy(balance = adjustment(account.balance))
 }
@@ -123,7 +123,7 @@ val withCredit : List[Account] = {
 They're also Bitraversable and Bifoldable, so we can perform operations with effects over each segement independently or
 perform different effectful operations over each type. Let's print out a warning to all users with a negative balance!
 
-```tut:book
+```scala mdoc
 
 val warnDelinquents = {
   def warn(user: Account): IO[Unit] = IO(println(user.name ++ ": get your act together!"))
@@ -136,7 +136,9 @@ val warnDelinquents = {
     .void
 }
 
-warnDelinquents.unsafeRunSync
+
+import cats.effect.unsafe.implicits.global
+warnDelinquents.unsafeRunSync()
 ```
 
 You can use the Bifoldable instance to do similarly interesting things, getSelected and getUnselected are provided as helpers which return lists of the selected and unselected items.
