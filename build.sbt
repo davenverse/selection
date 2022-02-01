@@ -16,9 +16,8 @@ lazy val selection = project.in(file("."))
   .settings(commonSettings, releaseSettings, skipOnPublishSettings)
   .aggregate(coreJVM, coreJS, docs)
 
-lazy val core = crossProject(JSPlatform, JVMPlatform)
-  .crossType(CrossType.Pure)
-  .in(file("core"))
+lazy val core = (file("core") / crossProject(JSPlatform, JVMPlatform)
+  .crossType(CrossType.Pure))
   .settings(commonSettings, releaseSettings, mimaSettings)
   .settings(
     name := "selection"
@@ -52,9 +51,9 @@ lazy val commonSettings = Seq(
   crossScalaVersions := Seq(scalaVersion.value, "2.11.12"),
   scalacOptions += "-Yrangepos",
 
-  scalacOptions in (Compile, doc) ++= Seq(
+  (Compile / doc / scalacOptions) ++= Seq(
       "-groups",
-      "-sourcepath", (baseDirectory in LocalRootProject).value.getAbsolutePath,
+      "-sourcepath", (LocalRootProject / baseDirectory).value.getAbsolutePath,
       "-doc-source-url", "https://github.com/christopherdavenport/selection/blob/v" + version.value + "€{FILE_PATH}.scala"
   ),
 
@@ -111,7 +110,7 @@ lazy val releaseSettings = {
           password
         )
     ).toSeq,
-    publishArtifact in Test := false,
+    (Test / publishArtifact) := false,
     releasePublishArtifactsAction := PgpKeys.publishSigned.value,
     scmInfo := Some(
       ScmInfo(
@@ -161,8 +160,8 @@ lazy val micrositeSettings = {
       "gray-lighter" -> "#F4F3F4",
       "white-color" -> "#FFFFFF"
     ),
-    fork in tut := true,
-    scalacOptions in Tut --= Seq(
+    (tut / fork) := true,
+    (Tut / scalacOptions) --= Seq(
       "-Xfatal-warnings",
       "-Ywarn-unused-import",
       "-Ywarn-numeric-widen",
@@ -235,7 +234,7 @@ lazy val mimaSettings = {
 }
 
 lazy val skipOnPublishSettings = Seq(
-  skip in publish := true,
+  (publish / skip) := true,
   publish := (()),
   publishLocal := (()),
   publishArtifact := false,
